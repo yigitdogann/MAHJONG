@@ -13,10 +13,32 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\assets">
+      <UniqueIdentifier>{226190da-fc02-4819-a261-8f7274951454}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\assets\license.txt">
+      <Filter>Source Files\assets</Filter>
+    </Text>
+    <Text Include="..\assets\map1.txt">
+      <Filter>Source Files\assets</Filter>
+    </Text>
+    <Text Include="..\assets\map2.txt">
+      <Filter>Source Files\assets</Filter>
+    </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\assets\mahjong-map-1.png">
+      <Filter>Source Files\assets</Filter>
+    </Image>
+    <Image Include="..\assets\mahjong-map-2.png">
+      <Filter>Source Files\assets</Filter>
+    </Image>
   </ItemGroup>
 </Project>
