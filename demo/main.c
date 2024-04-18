@@ -1,223 +1,303 @@
 ﻿#include <raylib.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#define WIDTH 70
+#define HEIGHT 96
+#define ARRAY_Y 18
+#define ARRAY_X 30
+#define LAYER 6
+#define NUM_IMAGES 36
+#define ARRAY_SIZE 144
 
-#define ROW 10
-#define COLUMN 25
-#define WIDTH 50
-#define HEIGHT 70
-#define COLOR1 (Color){ 0, 0, 0, 40} //used in gridlines  
 
+Image images[NUM_IMAGES];    // Array to hold image data
+Texture2D textures[NUM_IMAGES]; // Array to hold textures
+
+Image backGround;    // background
+Texture2D backGroundTexture;
+
+typedef struct tile {
+    int point;//point of tile, tür
+    int id; //shuffled, tür
+    bool isExists; //newMap, konum
+    Rectangle rectangle;
+    Texture2D texture;
+
+    int x, y, z;
+}tile;
+
+//typedef struct LastTwoClicked{
+//    tile* previousClicked;
+//    tile* lastClicked;
+//}LastTwoClicked;
+//
+//typedef struct doublyLinkedList {
+//    tile
+//}doublyLinkedList;
+//
+//LastTwoClicked LastClicks;
+
+int map[ARRAY_Y][ARRAY_X];
+int newMap[ARRAY_Y][ARRAY_X][LAYER] = { 0 };
+
+int original[ARRAY_SIZE];
+int shuffled[ARRAY_SIZE];
+
+tile tiles[ARRAY_Y][ARRAY_X][LAYER];
+int values[ARRAY_Y][ARRAY_X];
+Vector2 mousePosition;
+const int screenWidth = 1440;
+const int screenHeight = 900;
+int framesCounter = 0;          // Useful to count frames
+
+void InitGame();
+void updateGame();
+void shuffle(int* array, int n);
+void randomFiller();
+
+tile* getTopMostTile(tile tiles[ARRAY_Y][ARRAY_X][LAYER], Vector2 mousePosition);
+Color GetBlockColor(int point);
 FILE* file;
 
-typedef struct block {
-	Rectangle rec;
-	Color color;
-	int active;
-	int point;
-	bool drag;
-	int zIndex;
-}block;
+int main(void) {
+    InitWindow(screenWidth, screenHeight, "Mahjong Game");
+    InitGame();
 
-block blocks[10][25][5];
-block* draggedBlock; //pointer used to access the selected block
+    SetTargetFPS(60);
+    while (!WindowShouldClose())
+    {
+        updateGame();
+        BeginDrawing();
 
-bool drag; //is dragging now?
-int maxZIndex; //
-Vector2 mousePoint = { 0.0f, 0.0f }; //position of mouse cursor
+        //drawing rectangles (mahjong tiles)
 
-//screen variables
-const int screenWidth = 1400; //1250
-const int screenHeight = 850; //700
-int game_edge_offset_x;
-int game_edge_offset_y;
-const int offset_x;
-const int offset_y;
-int frameCounter;
+        DrawTexture(backGroundTexture, 0, 0, WHITE);
 
-//functions
-void InitGame();
-void updateGame(); 
-void drawGame();
+        int found_i = -1, found_j = -1, found_k = -1;
+        for (int k = 1, a = 0; k < LAYER; k++) {
+            for (int i = 0; i < ARRAY_Y; i++) {
+                for (int j = 0; j < ARRAY_X; j++) {
+                    if (tiles[i][j][k].isExists == true) {
+                        Color color = GetBlockColor(k);
+                        //DrawRectangle(tiles[i][j][k].rectangle.x, tiles[i][j][k].rectangle.y, WIDTH, HEIGHT, color);
+                        DrawTexture(tiles[i][j][k].texture, tiles[i][j][k].rectangle.x, tiles[i][j][k].rectangle.y, RAYWHITE);
+                        DrawCircle(tiles[i][j][k].rectangle.x, tiles[i][j][k].rectangle.y, 5, color);
+                        a++;
+                    }
+                }
+            }
+        }
 
-block* GetTopmostBlock(block blocks[10][25][5], Vector2 mousePoint);
-Color GetBlockColor(int point);
-int findMaxZIndex(block blocks[10][25][5]);
+        DrawCircle(tiles[0][0][0].rectangle.x, tiles[0][0][0].rectangle.y, 10, RED);
+        //DrawRectangleLinesEx((Rectangle) { 670, 418, 70, 95 }, 12.5, (Color) { 0, 0, 0, 50 });
+        //DrawRectangleLinesEx((Rectangle) { 645, 382, 140, 190 }, 20.5, (Color) { 0, 0, 0, 50 });
+        //DrawRectangleLinesEx((Rectangle) { 670, 418, 70, 95 }, 12.5, (Color) { 0, 0, 0, 50 });
 
+        EndDrawing();
+    }
 
-int main() {
-	InitWindow(screenWidth, screenHeight, "MAHJONG"); //opening a window
-	InitGame();
-	SetTargetFPS(60); //Setting FPS 
+    CloseWindow();
 
-	while (!WindowShouldClose()) {
-		updateGame();
-		drawGame();
-	}
-	CloseWindow();
+    return 0;
 }
 
-//initializing necessary values
 void InitGame() {
-	drag = false;
-	maxZIndex = 0;
-	//setting the game corner 
-	game_edge_offset_x = (screenWidth - 1250) / 2;
-	game_edge_offset_y = (screenHeight - 700) / 2;
 
-	//MAP SELECTION YAPILACAK
-	//read map from text file
-	file = fopen("../assets/map1.txt", "r");
-	//file = fopen("../assets/map2.txt", "r");
+    randomFiller();
+    // Karıştırılmış diziyi yazdır (isteğe bağlı)
+    for (int i = 0; i < ARRAY_SIZE; i++) {
+        printf("%d ", shuffled[i]);
+        if ((i + 1) % 12 == 0) printf("\n");
+    }
 
-	for (int j = 0; j < 10; j++) {
-		for (int k = 0; k < 25; k++) {
-			int a = 0;
-			fscanf(file, "%d", &a);
-			while (a) {
-				blocks[j][k][a - 1].point = a;
-				blocks[j][k][a - 1].rec.width = (float)(screenWidth / COLUMN);
-				blocks[j][k][a - 1].rec.height = (float)(screenHeight / ROW);
-				blocks[j][k][a - 1].rec.x = (float)(k * WIDTH + game_edge_offset_x);
-				blocks[j][k][a - 1].rec.y = (float)(j * HEIGHT + game_edge_offset_y);
-				blocks[j][k][a - 1].drag = false;
-				blocks[j][k][a - 1].zIndex = 0;
-				a--;
-			}
-		}
-	}
-	fclose(file);
+
+    //MAP SELECTION YAPILACAK
+    //read map from text file
+    file = fopen("../assets/original-map.txt", "r");
+    if (file == NULL) {
+        perror("Failed to open file");
+        return;
+    }
+    int x, y;
+
+    // Reading the file into a 2D array
+    for (y = 0; y < ARRAY_Y; y++) {
+        for (x = 0; x < ARRAY_X; x++) {
+            if (fscanf(file, "%1d", &map[y][x]) != 1) {
+                perror("Failed to read data");
+                return;
+            }
+        }
+    }
+
+    fclose(file);  // Always close the file after you're done reading
+
+    /*
+    // Print original map for debugging
+    for (int i = 0; i < ARRAY_Y; i++) {
+        for (int j = 0; j < ARRAY_X; j++) {
+            printf("%d", map[i][j]);
+        }
+        puts("");
+    }
+    */
+
+    backGround = LoadImage("../assets/bg-black.png");
+    backGroundTexture = LoadTextureFromImage(backGround);
+    UnloadImage(backGround);
+
+    for (int i = 0; i < NUM_IMAGES; i++) {
+        char filePath[NUM_IMAGES]; // Buffer to hold the file path
+        sprintf(filePath, "../assets/tiles/%d.png", i + 1); // Create file path, note images are 1-indexed in your folder
+
+        images[i] = LoadImage(filePath); // Load image data into CPU memory (RAM)
+        textures[i] = LoadTextureFromImage(images[i]); // Image converted to texture, GPU memory (RAM -> VRAM)
+        UnloadImage(images[i]); // Unload image data from CPU memory (RAM)
+    }
+
+    for (int k = LAYER - 1; k > 0; k--) {
+        for (int i = 0; i < HEIGHT - 1; i++) {
+            for (int j = 0; j < WIDTH - 1; j++) {
+                if ((map[i][j] == k) && (map[i][j + 1] == k) && (map[i + 1][j] == k) && (map[i + 1][j + 1] == k)) {
+                    newMap[i][j][k]++;
+                    map[i][j]--;
+                    map[i][j + 1]--;
+                    map[i + 1][j]--;
+                    map[i + 1][j + 1]--;
+                }
+            }
+        }
+    }
+
+
+    //// Print new map for debugging
+    //for (int i = 0; i < ARRAY_Y; i++) {
+    //    for (int j = 0; j < ARRAY_X; j++) {
+    //        printf("%d", newMap[i][j][5]);
+    //    }
+    //    puts("");
+    //}
+    //puts("");
+
+    for (int i = 0, a = 0; i < LAYER; i++) {
+        for (int j = 0; j < ARRAY_Y; j++) {
+            for (int k = 0; k < ARRAY_X; k++) {
+                tiles[j][k][i].y = j;
+                tiles[j][k][i].x = k;
+                tiles[j][k][i].z = i;
+                tiles[j][k][i].isExists = newMap[j][k][i];
+                tiles[j][k][i].rectangle.x = (float)(k * WIDTH / 2 - i * 8);
+                tiles[j][k][i].rectangle.y = (float)(j * HEIGHT / 2 - i * 20);
+                tiles[j][k][i].rectangle.width = (float)WIDTH;
+                tiles[j][k][i].rectangle.height = (float)HEIGHT;
+                if (tiles[j][k][i].isExists == true) {
+                    tiles[j][k][i].id = shuffled[a];
+                    tiles[j][k][i].texture = textures[shuffled[a] - 1];
+                    a++;
+                }
+            }
+        }
+    }
+
+
 }
 
-//update game before each frame is drawn
+void randomFiller() {
+    // Diziyi doldur
+    for (int i = 0; i < ARRAY_SIZE; i++) {
+        original[i] = i / 4 + 1;  // Her 4 eleman aynı değeri alacak
+    }
+
+    // Rastgele sayı üreticisini başlat
+    srand(time(NULL));
+
+    // Orijinal diziyi karıştır
+    shuffle(original, ARRAY_SIZE);
+
+    // Karıştırılmış diziyi yeni bir diziye kopyala
+    for (int i = 0; i < ARRAY_SIZE; i++) {
+        shuffled[i] = original[i];
+    }
+}
+
+// Fisher-Yates shuffle algorithm
+void shuffle(int* array, int n) {
+    for (int i = n - 1; i > 0; i--) {
+        int j = rand() % (i + 1);
+        int temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+}
+
+
 void updateGame() {
-	mousePoint = GetMousePosition();
-
-	maxZIndex = findMaxZIndex(blocks); // Find the maximum zIndex
-
-	if (!drag) {
-		block* topmostBlock = GetTopmostBlock(blocks, mousePoint);
-		if (topmostBlock != NULL) {
-			if (CheckCollisionPointRec(mousePoint, topmostBlock->rec) && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
-				topmostBlock->drag = true;
-				drag = true;
-				draggedBlock = topmostBlock;  // Set the dragged block
-
-				if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
-					topmostBlock->drag = true;
-					drag = true;
-					draggedBlock = topmostBlock;
-					maxZIndex = findMaxZIndex(blocks);
-					draggedBlock->zIndex = maxZIndex + 1;
-				}
-			}
-		}
-	}
-	else if (draggedBlock != NULL) {
-		// update position of dragged block
-		draggedBlock->rec.x = mousePoint.x - WIDTH / 2;
-		draggedBlock->rec.y = mousePoint.y - HEIGHT / 2;
-
-		// release the dragged block
-		if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
-			draggedBlock->drag = false;
-			drag = false;
-			draggedBlock->zIndex += 1;
-			draggedBlock = NULL;  // reset the dragged block
-
-		}
-	}
-}
-
-//drawing each frame separately
-void drawGame() {
-	BeginDrawing();
-
-	ClearBackground(MAROON);
-	DrawRectangle((screenWidth - 1250) / 2, (screenHeight - 700) / 2, 1250, 700, GRAY);
-	DrawText("move ball with mouse and click mouse button to change color", 10, 10, 20, DARKGRAY);
-
-	//drawing rectangles (mahjong tiles)
-	for (int zIndex = 0; zIndex <= findMaxZIndex(blocks); zIndex++) {
-		for (int i = 0; i < 10; i++) {
-			for (int j = 0; j < 25; j++) {
-				for (int k = 0; k < 5; k++) {
-					if (blocks[i][j][k].zIndex == zIndex) {
-						Color color = GetBlockColor(blocks[i][j][k].point);
-						DrawRectangle(blocks[i][j][k].rec.x, blocks[i][j][k].rec.y, WIDTH, HEIGHT, color);
-					}
-				}
-			}
-		}
-	}
-
-	// Draw the dragged block last
-	if (drag && draggedBlock != NULL) {
-		Color color = GetBlockColor(draggedBlock->point);
-		DrawRectangle(draggedBlock->rec.x, draggedBlock->rec.y, WIDTH, HEIGHT, color);
-	}
-
-	//drawing gridlines 
-	for (int i = 0; i < ROW; i++) {
-		DrawLine(0 + game_edge_offset_x, i * HEIGHT + game_edge_offset_y, screenWidth - game_edge_offset_x, i * HEIGHT + game_edge_offset_y, COLOR1);
-	}
-	for (int i = 0; i < COLUMN; i++) {
-		DrawLine(i * WIDTH + game_edge_offset_x, game_edge_offset_y, i * WIDTH + game_edge_offset_x, screenHeight - game_edge_offset_y, COLOR1);
-	}
-	frameCounter++; 
-	
-	EndDrawing();
+    mousePosition = GetMousePosition();
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) == true) {
+        getTopMostTile(tiles, mousePosition);
+    }
 }
 
 //color according to points (drawing fonksiyonunda fazladan if/else kurmaktan kacinildi)
-Color GetBlockColor(int point) {
-	switch (point) {
-	case 1: return BLACK;
-	case 2: return YELLOW;
-	case 3: return GREEN;
-	case 4: return BLUE;
-	case 5: return RED;;
-	}
+Color GetBlockColor(int layer) {
+    switch (layer) {
+    case 1: return BLACK;
+    case 2: return YELLOW;
+    case 3: return GREEN;
+    case 4: return BLUE;
+    case 5: return RED;
+    default: return MAGENTA;
+    }
 }
 
-//get the highest layer block OR last dragged block
-//eger onceden suruklenilmisse onu secmesini saglar yoksa initial puanina gore en yukaridaki blogu sectirir.
-block* GetTopmostBlock(block blocks[10][25][5], Vector2 mousePoint) {
-	block* topmostBlock = NULL;
-	int highestZIndex = -1;
-	int highestPointIndex = -1;
-
-	for (int i = 0; i < 10; i++) {
-		for (int j = 0; j < 25; j++) {
-			for (int k = 0; k < 5; k++) {
-				if (CheckCollisionPointRec(mousePoint, blocks[i][j][k].rec)) {
-					// Check if this block has the highest zIndex or the same zIndex but a higher point
-					if (blocks[i][j][k].zIndex > highestZIndex ||
-						(blocks[i][j][k].zIndex == highestZIndex && blocks[i][j][k].point > highestPointIndex)) {
-						highestZIndex = blocks[i][j][k].zIndex;
-						highestPointIndex = blocks[i][j][k].point;
-						topmostBlock = &blocks[i][j][k];
-					}
-				}
-			}
-		}
-	}
-
-	return topmostBlock;
+tile* getTopMostTile(tile tiles[ARRAY_Y][ARRAY_X][LAYER], Vector2 mousePosition) {
+    tile* pointer = NULL;
+    for (int i = LAYER - 1; i >= 0; i--) {
+        for (int j = 0, a = 0; j < ARRAY_Y; j++){
+            for (int k = 0; k < ARRAY_X; k++){
+                if ((CheckCollisionPointRec(mousePosition, tiles[j][k][i].rectangle)) && tiles[j][k][i].isExists == true) {
+                pointer = &tiles[j][k][i];
+                goto end;
+                }
+            }
+        }
+    }
+    end:
+    if (pointer != NULL) {
+        printf("Z:%d Y:%d X:%d\n", pointer->z, pointer->y, pointer->x);
+    }
+    else {
+        printf("No tile found at the given position.\n");
+    }
+    return pointer;
 }
 
-//get the last dragged blocks 
-//update fonksitonunda son suruklenen ogelerin tespitinde kullanildi 
-//drawing fonksitonunda son suruklenen ogelerin daha sonra cizilmesi icin kullanildi 
-int findMaxZIndex(block blocks[10][25][5]) {
-	int maxZ = -1;
-	for (int i = 0; i < 10; i++) {
-		for (int j = 0; j < 25; j++) {
-			for (int k = 0; k < 5; k++) {
-				if (blocks[i][j][k].zIndex > maxZ) {
-					maxZ = blocks[i][j][k].zIndex;
-				}
-			}
-		}
-	}
-	return maxZ;
+bool isClickable(tile* tile) {
+    int x = tile->x;
+    int y = tile->y;
+    int z = tile->z;
+
+    if (tiles[y][x + 1][z + 1].isExists == true) {
+        return false;
+    }
+    if (tiles[y + 1][x + 1][z + 1].isExists == true) {
+        return false;
+    }
+    if (tiles[y][x][z + 1].isExists == true) {
+        return false;
+    }
+    if (tiles[y + 1][x][z + 1].isExists == true) {
+        return false;
+    }
+
+    bool right = tiles[y][x + 1][z].isExists&& tiles[y][x + 2][z].isExists;
+    bool left = tiles[y][x - 1][z].isExists&& tiles[y][x - 2][z].isExists;
+
+    if ((right && left) == true) {
+        return false;
+    }
+    
+    return true;
 }
+

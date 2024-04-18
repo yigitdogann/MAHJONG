@@ -13,8 +13,8 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Source Files\assets">
-      <UniqueIdentifier>{226190da-fc02-4819-a261-8f7274951454}</UniqueIdentifier>
+    <Filter Include="Source Files\tiles">
+      <UniqueIdentifier>{1c114b44-ea9b-4473-96f4-b542737bf198}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -24,21 +24,129 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\assets\license.txt">
-      <Filter>Source Files\assets</Filter>
+      <Filter>Source Files</Filter>
     </Text>
     <Text Include="..\assets\map1.txt">
-      <Filter>Source Files\assets</Filter>
+      <Filter>Source Files</Filter>
     </Text>
     <Text Include="..\assets\map2.txt">
-      <Filter>Source Files\assets</Filter>
+      <Filter>Source Files</Filter>
+    </Text>
+    <Text Include="..\assets\original-map.txt">
+      <Filter>Source Files</Filter>
     </Text>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\assets\mahjong-map-1.png">
-      <Filter>Source Files\assets</Filter>
-    </Image>
     <Image Include="..\assets\mahjong-map-2.png">
-      <Filter>Source Files\assets</Filter>
+      <Filter>Source Files</Filter>
+    </Image>
+    <Image Include="..\assets\exact-tiles\exact-tiles\1.png">
+      <Filter>Source Files\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\exact-tiles\exact-tiles\2.png">
+      <Filter>Source Files\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\exact-tiles\exact-tiles\3.png">
+      <Filter>Source Files\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\exact-tiles\exact-tiles\4.png">
+      <Filter>Source Files\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\exact-tiles\exact-tiles\5.png">
+      <Filter>Source Files\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\exact-tiles\exact-tiles\6.png">
+      <Filter>Source Files\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\exact-tiles\exact-tiles\7.png">
+      <Filter>Source Files\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\exact-tiles\exact-tiles\8.png">
+      <Filter>Source Files\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\exact-tiles\exact-tiles\9.png">
+      <Filter>Source Files\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\exact-tiles\exact-tiles\10.png">
+      <Filter>Source Files\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\exact-tiles\exact-tiles\11.png">
+      <Filter>Source Files\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\exact-tiles\exact-tiles\12.png">
+      <Filter>Source Files\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\exact-tiles\exact-tiles\13.png">
+      <Filter>Source Files\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\exact-tiles\exact-tiles\14.png">
+      <Filter>Source Files\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\exact-tiles\exact-tiles\15.png">
+      <Filter>Source Files\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\exact-tiles\exact-tiles\16.png">
+      <Filter>Source Files\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\exact-tiles\exact-tiles\17.png">
+      <Filter>Source Files\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\exact-tiles\exact-tiles\18.png">
+      <Filter>Source Files\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\exact-tiles\exact-tiles\19.png">
+      <Filter>Source Files\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\exact-tiles\exact-tiles\20.png">
+      <Filter>Source Files\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\exact-tiles\exact-tiles\21.png">
+      <Filter>Source Files\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\exact-tiles\exact-tiles\22.png">
+      <Filter>Source Files\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\exact-tiles\exact-tiles\23.png">
+      <Filter>Source Files\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\exact-tiles\exact-tiles\24.png">
+      <Filter>Source Files\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\exact-tiles\exact-tiles\25.png">
+      <Filter>Source Files\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\exact-tiles\exact-tiles\26.png">
+      <Filter>Source Files\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\exact-tiles\exact-tiles\27.png">
+      <Filter>Source Files\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\exact-tiles\exact-tiles\28.png">
+      <Filter>Source Files\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\exact-tiles\exact-tiles\29.png">
+      <Filter>Source Files\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\exact-tiles\exact-tiles\30.png">
+      <Filter>Source Files\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\exact-tiles\exact-tiles\31.png">
+      <Filter>Source Files\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\exact-tiles\exact-tiles\32.png">
+      <Filter>Source Files\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\exact-tiles\exact-tiles\33.png">
+      <Filter>Source Files\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\exact-tiles\exact-tiles\34.png">
+      <Filter>Source Files\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\exact-tiles\exact-tiles\35.png">
+      <Filter>Source Files\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\exact-tiles\exact-tiles\36.png">
+      <Filter>Source Files\tiles</Filter>
     </Image>
   </ItemGroup>
 </Project>
