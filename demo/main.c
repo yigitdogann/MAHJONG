@@ -55,6 +55,7 @@ void InitGame();
 void updateGame();
 void shuffle(int* array, int n);
 void randomFiller();
+void processClick();
 
 tile* getTopMostTile(tile tiles[ARRAY_Y][ARRAY_X][LAYER], Vector2 mousePosition);
 Color GetBlockColor(int point);
@@ -235,7 +236,7 @@ void shuffle(int* array, int n) {
 void updateGame() {
     mousePosition = GetMousePosition();
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) == true) {
-        getTopMostTile(tiles, mousePosition);
+        processClick();
     }
 }
 
@@ -290,10 +291,21 @@ bool isClickable(tile* tile) {
     if (tiles[y + 1][x][z + 1].isExists == true) {
         return false;
     }
-
-    bool right = tiles[y][x + 1][z].isExists&& tiles[y][x + 2][z].isExists;
-    bool left = tiles[y][x - 1][z].isExists&& tiles[y][x - 2][z].isExists;
-
+    if (tiles[y -1][x-1][z+1].isExists == true) {
+        return false;
+    }
+    if (tiles[y + 1][x-1][z + 1].isExists == true) {
+        return false;
+    }
+    if (tiles[y - 1][x+1][z + 1].isExists == true) {
+        return false;
+    }
+    
+    bool right = tiles[y][x + 1][z].isExists || tiles[y][x + 2][z].isExists || tiles[y + 1][x + 1][z].isExists 
+        || tiles[y + 1][x + 2][z].isExists || tiles[y - 1][x + 1][z].isExists || tiles[y - 1][x + 2][z].isExists;
+    
+    bool left = tiles[y][x - 1][z].isExists || tiles[y][x - 2][z].isExists || tiles[y + 1][x - 1][z].isExists
+        || tiles[y + 1][x - 2][z].isExists || tiles[y - 1][x - 1][z].isExists || tiles[y - 1][x - 2][z].isExists;
     if ((right && left) == true) {
         return false;
     }
@@ -301,3 +313,15 @@ bool isClickable(tile* tile) {
     return true;
 }
 
+void processClick() {
+    tile* pointer = NULL;
+    pointer = getTopMostTile(tiles, mousePosition);
+
+    if (isClickable(pointer)) {
+        printf("YES\n");
+    }
+    else {
+        printf("NO\n");
+    }
+
+}
