@@ -2,8 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#define RAYGUI_IMPLEMENTATION
-#include <raygui.h>
 
 #define WIDTH 70
 #define HEIGHT 96
@@ -22,7 +20,9 @@ Texture2D backGroundTexture;
 typedef struct tile {
     int point;//point of tile, tür
     int id; //shuffled, tür
+    
     bool isExists; //newMap, konum
+    
     Rectangle rectangle;
     Texture2D texture;
 
@@ -35,7 +35,8 @@ typedef struct LastTwoClicked{
 }LastTwoClicked;
 
 typedef struct node{
-    tile* data;
+    tile* data1;
+    tile* data2;
     struct node* nextNode;
 }node;
 
@@ -54,15 +55,15 @@ const int screenWidth = 1440;
 const int screenHeight = 900;
 int framesCounter = 0;          // Useful to count frames
 Vector2 shuffleCircle;
-
+bool isSame(tile* tile1, tile* tile2);
+bool removable(LastTwoClicked LastClicks);
 void InitGame();
 void updateGame();
 void shuffle(int* array, int n);
 void randomFiller();
-tile* processClick();
-tile* addBegin(node** head, tile* x); 
+void processClick();
+void addBegin(node** head, LastTwoClicked *LastClicks); 
 void deleteBegin(node** head);
-void printList(node* head);
 tile* getTopMostTile(tile tiles[ARRAY_Y][ARRAY_X][LAYER], Vector2 mousePosition);
 Color GetBlockColor(int point);
 FILE* file;
@@ -98,7 +99,6 @@ int main(void) {
             }
         }
 
-        DrawCircle(tiles[0][0][0].rectangle.x, tiles[0][0][0].rectangle.y, 10, RED);
         //DrawRectangleLinesEx((Rectangle) { 670, 418, 70, 95 }, 12.5, (Color) { 0, 0, 0, 50 });
         //DrawRectangleLinesEx((Rectangle) { 645, 382, 140, 190 }, 20.5, (Color) { 0, 0, 0, 50 });
         //DrawRectangleLinesEx((Rectangle) { 670, 418, 70, 95 }, 12.5, (Color) { 0, 0, 0, 50 });
@@ -112,7 +112,9 @@ int main(void) {
 }
 
 void InitGame() {
-    
+    LastClicks.lastClicked = NULL;
+    LastClicks.previousClicked = NULL;
+
     shuffleCircle.x = (float)1240;
     shuffleCircle.y = (float)450;
 
@@ -122,7 +124,6 @@ void InitGame() {
         printf("%d ", shuffled[i]);
         if ((i + 1) % 12 == 0) printf("\n");
     }
-
 
     //MAP SELECTION YAPILACAK
     //read map from text file
@@ -338,34 +339,43 @@ bool isClickable(tile* tile) {
     return true;
 }
 
-tile* processClick() {
+void processClick() {
     tile* pointer = NULL;
     
     pointer = getTopMostTile(tiles, mousePosition);
 
     if (isClickable(pointer)) {
-        printf("YES\n");
-        tile* ptr = addBegin(&head, pointer);
+        printf("buraya girdi\n");
+        LastClicks.previousClicked = LastClicks.lastClicked;
+        LastClicks.lastClicked = pointer;
+        if (removable(LastClicks) == true) {
+            printf("YES\n");
+            addBegin(&head, &LastClicks);
+        }
     }
-    else {
+    if(pointer == NULL) {
         deleteBegin(&head);
         printf("NO\n");
     }
-    return pointer;
+    return;
 }
 
-tile* addBegin(node** head, tile* x) {
+void addBegin(node** head, LastTwoClicked *LastClicks) {
     node* newNode = (node*)malloc(sizeof(node));
     if (newNode == NULL) {
         printf("Memory allocation error in add_node_begin()\n");
         return;
     }
-    x->isExists = false;
-    newNode->data = x;
+    newNode->data1 = LastClicks->lastClicked;
+    newNode->data2 = LastClicks->previousClicked;
+
+    newNode->data1->isExists = false;
+    newNode->data2->isExists = false;
+
     newNode->nextNode = *head;
 
     *head = newNode;
-    return &x;
+    return;
 }
 
 void deleteBegin(node** head) {
@@ -374,18 +384,13 @@ void deleteBegin(node** head) {
         return;
     }
     node* tempNode = *head;
-    (*head)->data->isExists = true;
+
+    (*head)->data1->isExists = true;
+    (*head)->data2->isExists = true;
+
     *head = (*head)->nextNode;
     
     free(tempNode);
-}
-
-void printList(node* head) {
-    while (head != NULL) {
-        printf("%d -> ", head->data->id);
-        head = head->nextNode;
-    }
-    printf("NULL\n");
 }
 
 void shuffle_all() {
@@ -403,8 +408,18 @@ void shuffle_all() {
     }
 }
 
-void controlDelete(LastTwoClicked LastClicks) {
-    if (LastClicks.lastClicked->id == LastClicks.previousClicked->id) {
-
+bool removable(LastTwoClicked LastClicks) {
+    if (LastClicks.lastClicked == NULL || LastClicks.previousClicked == NULL) {
+        return false;
     }
+    if (!(LastClicks.lastClicked->id == LastClicks.previousClicked->id)) {
+        return false;
+    }
+    if ((LastClicks.lastClicked->x == LastClicks.previousClicked->x)
+        && (LastClicks.lastClicked->y == LastClicks.previousClicked->y)
+        && (LastClicks.lastClicked->z == LastClicks.previousClicked->z)) {
+        return false;
+    }
+
+    return true;
 }
