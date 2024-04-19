@@ -2,14 +2,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#define RAYGUI_IMPLEMENTATION
+#include <raygui.h>
+
 #define WIDTH 70
 #define HEIGHT 96
 #define ARRAY_Y 18
-#define ARRAY_X 30
+#define ARRAY_X 34
 #define LAYER 6
 #define NUM_IMAGES 36
 #define ARRAY_SIZE 144
-
 
 Image images[NUM_IMAGES];    // Array to hold image data
 Texture2D textures[NUM_IMAGES]; // Array to hold textures
@@ -27,16 +29,17 @@ typedef struct tile {
     int x, y, z;
 }tile;
 
-//typedef struct LastTwoClicked{
-//    tile* previousClicked;
-//    tile* lastClicked;
-//}LastTwoClicked;
-//
-//typedef struct doublyLinkedList {
-//    tile
-//}doublyLinkedList;
-//
-//LastTwoClicked LastClicks;
+typedef struct LastTwoClicked{
+    tile* previousClicked;
+    tile* lastClicked;
+}LastTwoClicked;
+
+typedef struct node{
+    tile* data;
+    struct node* nextNode;
+}node;
+
+LastTwoClicked LastClicks;
 
 int map[ARRAY_Y][ARRAY_X];
 int newMap[ARRAY_Y][ARRAY_X][LAYER] = { 0 };
@@ -50,31 +53,36 @@ Vector2 mousePosition;
 const int screenWidth = 1440;
 const int screenHeight = 900;
 int framesCounter = 0;          // Useful to count frames
+Vector2 shuffleCircle;
 
 void InitGame();
 void updateGame();
 void shuffle(int* array, int n);
 void randomFiller();
-void processClick();
-
+tile* processClick();
+tile* addBegin(node** head, tile* x); 
+void deleteBegin(node** head);
+void printList(node* head);
 tile* getTopMostTile(tile tiles[ARRAY_Y][ARRAY_X][LAYER], Vector2 mousePosition);
 Color GetBlockColor(int point);
 FILE* file;
+node* head = NULL;
+void shuffle_all();
 
 int main(void) {
     InitWindow(screenWidth, screenHeight, "Mahjong Game");
     InitGame();
-
+    
     SetTargetFPS(60);
     while (!WindowShouldClose())
     {
         updateGame();
         BeginDrawing();
-
+        DrawTexture(backGroundTexture, 0, 0, WHITE);
         //drawing rectangles (mahjong tiles)
 
-        DrawTexture(backGroundTexture, 0, 0, WHITE);
-
+        
+        DrawCircleV(shuffleCircle, 30.0, GOLD);
         int found_i = -1, found_j = -1, found_k = -1;
         for (int k = 1, a = 0; k < LAYER; k++) {
             for (int i = 0; i < ARRAY_Y; i++) {
@@ -104,6 +112,9 @@ int main(void) {
 }
 
 void InitGame() {
+    
+    shuffleCircle.x = (float)1240;
+    shuffleCircle.y = (float)450;
 
     randomFiller();
     // Karıştırılmış diziyi yazdır (isteğe bağlı)
@@ -236,7 +247,12 @@ void shuffle(int* array, int n) {
 void updateGame() {
     mousePosition = GetMousePosition();
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) == true) {
-        processClick();
+        if (!CheckCollisionPointCircle(mousePosition, shuffleCircle, 30.0)) {
+            processClick();
+        }
+        else {
+            shuffle_all();
+        }
     }
 }
 
@@ -255,15 +271,16 @@ Color GetBlockColor(int layer) {
 tile* getTopMostTile(tile tiles[ARRAY_Y][ARRAY_X][LAYER], Vector2 mousePosition) {
     tile* pointer = NULL;
     for (int i = LAYER - 1; i >= 0; i--) {
-        for (int j = 0, a = 0; j < ARRAY_Y; j++){
-            for (int k = 0; k < ARRAY_X; k++){
+        for (int j = 0, a = 0; j < ARRAY_Y; j++) {
+            for (int k = 0; k < ARRAY_X; k++) {
                 if ((CheckCollisionPointRec(mousePosition, tiles[j][k][i].rectangle)) && tiles[j][k][i].isExists == true) {
-                pointer = &tiles[j][k][i];
-                goto end;
+                    pointer = &tiles[j][k][i];
+                    goto end;
                 }
             }
         }
     }
+    
     end:
     if (pointer != NULL) {
         printf("Z:%d Y:%d X:%d\n", pointer->z, pointer->y, pointer->x);
@@ -275,6 +292,10 @@ tile* getTopMostTile(tile tiles[ARRAY_Y][ARRAY_X][LAYER], Vector2 mousePosition)
 }
 
 bool isClickable(tile* tile) {
+    if (tile == NULL) {
+        return false;
+    }
+
     int x = tile->x;
     int y = tile->y;
     int z = tile->z;
@@ -291,37 +312,99 @@ bool isClickable(tile* tile) {
     if (tiles[y + 1][x][z + 1].isExists == true) {
         return false;
     }
-    if (tiles[y -1][x-1][z+1].isExists == true) {
+    if (tiles[y - 1][x - 1][z + 1].isExists == true) {
         return false;
     }
-    if (tiles[y + 1][x-1][z + 1].isExists == true) {
+    if (tiles[y + 1][x - 1][z + 1].isExists == true) {
         return false;
     }
-    if (tiles[y - 1][x+1][z + 1].isExists == true) {
+    if (tiles[y - 1][x + 1][z + 1].isExists == true) {
         return false;
     }
-    
-    bool right = tiles[y][x + 1][z].isExists || tiles[y][x + 2][z].isExists || tiles[y + 1][x + 1][z].isExists 
-        || tiles[y + 1][x + 2][z].isExists || tiles[y - 1][x + 1][z].isExists || tiles[y - 1][x + 2][z].isExists;
-    
-    bool left = tiles[y][x - 1][z].isExists || tiles[y][x - 2][z].isExists || tiles[y + 1][x - 1][z].isExists
-        || tiles[y + 1][x - 2][z].isExists || tiles[y - 1][x - 1][z].isExists || tiles[y - 1][x - 2][z].isExists;
-    if ((right && left) == true) {
+
+    bool RR = tiles[y - 1][x + 2][z].isExists || tiles[y + 1][x + 2][z].isExists;
+    //üst kat
+
+    bool LL = tiles[y - 1][x - 2][z].isExists || tiles[y + 1][x - 2][z].isExists;
+    //alt kat
+
+    bool right = tiles[y][x + 2][z].isExists;
+    bool left = tiles[y][x - 2][z].isExists;
+
+    if ((right || RR) && (left || LL)) {
         return false;
     }
-    
+
     return true;
 }
 
-void processClick() {
+tile* processClick() {
     tile* pointer = NULL;
+    
     pointer = getTopMostTile(tiles, mousePosition);
 
     if (isClickable(pointer)) {
         printf("YES\n");
+        tile* ptr = addBegin(&head, pointer);
     }
     else {
+        deleteBegin(&head);
         printf("NO\n");
     }
+    return pointer;
+}
 
+tile* addBegin(node** head, tile* x) {
+    node* newNode = (node*)malloc(sizeof(node));
+    if (newNode == NULL) {
+        printf("Memory allocation error in add_node_begin()\n");
+        return;
+    }
+    x->isExists = false;
+    newNode->data = x;
+    newNode->nextNode = *head;
+
+    *head = newNode;
+    return &x;
+}
+
+void deleteBegin(node** head) {
+    if (*head == NULL) {
+        printf("Linked list is already empty\n");
+        return;
+    }
+    node* tempNode = *head;
+    (*head)->data->isExists = true;
+    *head = (*head)->nextNode;
+    
+    free(tempNode);
+}
+
+void printList(node* head) {
+    while (head != NULL) {
+        printf("%d -> ", head->data->id);
+        head = head->nextNode;
+    }
+    printf("NULL\n");
+}
+
+void shuffle_all() {
+    shuffle(shuffled, ARRAY_SIZE);
+    for (int i = 0, a = 0; i < LAYER; i++) {
+        for (int j = 0; j < ARRAY_Y; j++) {
+            for (int k = 0; k < ARRAY_X; k++) {
+                if (tiles[j][k][i].isExists == true) {
+                    tiles[j][k][i].id = shuffled[a];
+                    tiles[j][k][i].texture = textures[shuffled[a] - 1];
+                    a++;
+                }
+            }
+        }
+    }
+}
+
+void controlDelete(LastTwoClicked LastClicks) {
+    if (LastClicks.lastClicked->id == LastClicks.previousClicked->id) {
+
+    }
 }
