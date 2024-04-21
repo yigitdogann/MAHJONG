@@ -268,26 +268,17 @@ Color GetBlockColor(int layer) {
 }
 
 tile* getTopMostTile(tile tiles[ARRAY_Y][ARRAY_X][LAYER], Vector2 mousePosition) {
-    tile* pointer = NULL;
-    for (int i = LAYER - 1; i >= 0; i--) {
+    for (int i = LAYER - 1; i >= 0; i--) {//ilk en yukaridaki layerlari kontrol et
         for (int j = 0, a = 0; j < ARRAY_Y; j++) {
             for (int k = 0; k < ARRAY_X; k++) {
                 if ((CheckCollisionPointRec(mousePosition, tiles[j][k][i].rectangle)) && tiles[j][k][i].isExists == true) { //3 boyutu da kontrol eder ve eger tas varsa, mousun ucundaki tasi bulur 
-                    pointer = &tiles[j][k][i]; // pointera gonderir ileride kullanacagiz 
-                    goto end;
+                    return &tiles[j][k][i]; // pointera gonderir ileride kullanacagiz
                 }
             }
         }
     }
 
-end:
-    if (pointer != NULL) {
-        //printf("Z:%d Y:%d X:%d\n", pointer->z, pointer->y, pointer->x);
-    }
-    else {
-        //printf("No tile found at the given position.\n");
-    }
-    return pointer;
+    return NULL;
 }
 
 bool isClickable(tile* tile) {
