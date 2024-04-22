@@ -185,8 +185,7 @@ void InitGame() {
                 if (tiles[j][k][i].isExists == true) {// eger tas var ise
                     tiles[j][k][i].id = shuffled[a]; //taslari karistirildi ve cizilmesi gerekenlere sirayla atanacak
                     tiles[j][k][i].texture = textures[shuffled[a] - 1];
-                    a++;// bir sonraki gorseli ata 
-                    //bata gote koyum
+                    a++;// bir sonraki gorseli ata
                     tiles[j][k][i].color = RAYWHITE;//tasi normal renk tonunda ciz, (farkli renk koyup degisiklikler gozlenebilir)
                 }
             }
