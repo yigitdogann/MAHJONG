@@ -20,8 +20,9 @@ Texture2D backGroundTexture;
 typedef struct tile {
     int point;//point of tile, tür
     int id; //shuffled, tür
-
+    int order;
     bool isExists; //newMap, konum
+    bool isRemovable;
 
     Rectangle rectangle;
     Texture2D texture;
@@ -49,6 +50,7 @@ int newMap[ARRAY_Y][ARRAY_X][LAYER] = { 0 };
 
 int original[ARRAY_SIZE];
 int shuffled[ARRAY_SIZE];
+int isExist[ARRAY_SIZE] = { 0 };
 
 tile tiles[ARRAY_Y][ARRAY_X][LAYER];
 int values[ARRAY_Y][ARRAY_X];
@@ -57,12 +59,12 @@ const int screenWidth = 1440;
 const int screenHeight = 900;
 int framesCounter = 0; // Useful to count frames
 Vector2 shuffleCircle;
-bool isSame(tile* tile1, tile* tile2);
-bool removable(LastTwoClicked LastClicks);
+bool isClickable(tile* tile);
+bool removable(tile* tile1, tile* tile2);
 void InitGame();
 void updateGame();
 void drawGame();
-
+void shuffleBasedOnCondition(int* a, int* b, int size, int x);
 void shuffle(int* array, int n);
 void randomFiller();
 void processClick();
@@ -97,15 +99,13 @@ void InitGame() {
     shuffleCircle.x = (float)1240;
     shuffleCircle.y = (float)450;
 
-    randomFiller();
-    // Karıştırılmış diziyi yazdır (isteğe bağlı)
     for (int i = 0; i < ARRAY_SIZE; i++) {
-        printf("%d ", shuffled[i]);
-        if ((i + 1) % 12 == 0) printf("\n");
+        isExist[i] = 0;
     }
 
+    randomFiller();
     //read map from text file
-    file = fopen("../assets/original-map.txt", "r"); //dosyayi oku 
+    file = fopen("../assets/map2.txt", "r"); //dosyayi oku 
     if (file == NULL) { //dosyayi okumazsan konsola error ver
         perror("Failed to open file");
         return;
@@ -140,7 +140,7 @@ void InitGame() {
 
     for (int i = 0; i < NUM_IMAGES; i++) {
         char filePath[NUM_IMAGES]; // Buffer to hold the file path
-        sprintf(filePath, "../assets/tiles/%d.png", i + 1); // Create file path, note images are 1-indexed in your folder
+        sprintf(filePath, "../assets/tiles/%d.png", i); // Create file path, note images are 1-indexed in your folder
 
         images[i] = LoadImage(filePath); // Load image data into CPU memory (RAM)
         textures[i] = LoadTextureFromImage(images[i]); // Image converted to texture, GPU memory (RAM -> VRAM)
@@ -183,14 +183,17 @@ void InitGame() {
                 tiles[j][k][i].rectangle.width = (float)WIDTH; //tasin yuksekligi
                 tiles[j][k][i].rectangle.height = (float)HEIGHT;// tasin uzunlugu
                 if (tiles[j][k][i].isExists == true) {// eger tas var ise
-                    tiles[j][k][i].id = shuffled[a]; //taslari karistirildi ve cizilmesi gerekenlere sirayla atanacak
-                    tiles[j][k][i].texture = textures[shuffled[a] - 1];
-                    a++;// bir sonraki gorseli ata
                     tiles[j][k][i].color = RAYWHITE;//tasi normal renk tonunda ciz, (farkli renk koyup degisiklikler gozlenebilir)
+                    tiles[j][k][i].id = shuffled[a]; //taslari karistirildi ve cizilmesi gerekenlere sirayla atanacak
+                    tiles[j][k][i].texture = textures[original[a]];
+                    tiles[j][k][i].order = a;
+                    isExist[a]++;
+                    a++;
                 }
             }
         }
     }
+
 }
 
 void drawGame() {
@@ -211,21 +214,23 @@ void drawGame() {
         }
     }
 
+
     EndDrawing();
 }
 
 void randomFiller() {
     // Diziyi doldur
     for (int i = 0; i < ARRAY_SIZE; i++) {
-        original[i] = i / 4 + 1;  // Her 4 eleman aynı değeri alacak
+        original[i] = i / 4;  // Her 4 eleman aynı değeri alacak
     }
 
-    // Rastgele sayı üreticisini başlat
-    srand(time(NULL));
-
-    // Orijinal diziyi karıştır
-    shuffle(original, ARRAY_SIZE);
-
+    shuffleBasedOnCondition(original, isExist, ARRAY_SIZE, 0);
+    for (int i = 0; i < ARRAY_SIZE; i++) {
+        printf("%d", original[i]);
+    }
+    for (int i = 0; i < ARRAY_SIZE; i++) {
+        printf("%d", isExist[i]);
+    }
     // Karıştırılmış diziyi yeni bir diziye kopyala
     for (int i = 0; i < ARRAY_SIZE; i++) {
         shuffled[i] = original[i];
@@ -310,17 +315,17 @@ bool isClickable(tile* tile) {
     if (tiles[y - 1][x + 1][z + 1].isExists == true) {
         return false;
     }
+    if (tiles[y - 1][x][z + 1].isExists == true) {
+        return false;
+    }
 
-    bool RR = tiles[y - 1][x + 2][z].isExists || tiles[y + 1][x + 2][z].isExists;
+    bool right = tiles[y - 1][x + 2][z].isExists || tiles[y][x + 2][z].isExists || tiles[y + 1][x + 2][z].isExists;
     //üst kat
 
-    bool LL = tiles[y - 1][x - 2][z].isExists || tiles[y + 1][x - 2][z].isExists;
+    bool left = tiles[y - 1][x - 2][z].isExists || tiles[y][x - 2][z].isExists || tiles[y + 1][x - 2][z].isExists;
     //alt kat
 
-    bool right = tiles[y][x + 2][z].isExists;
-    bool left = tiles[y][x - 2][z].isExists;
-
-    if ((right || RR) && (left || LL)) {
+    if (right && left) {
         return false;
     }
 
@@ -331,7 +336,7 @@ void processClick() {
     tile* pointer = NULL;
 
     pointer = getTopMostTile(tiles, mousePosition);// imlec ile tiklanilan tasi point eder
-
+    if (pointer != NULL)printf("order: %d", pointer->order);
     if (isClickable(pointer) && LastClicks.lastClicked != pointer) {//tiklanilan bir tas ise && eger son tiklanilan tasa bir kez daha tiklanirsa 2. isaretlemeyi kabul etmez
         printf("buraya girdi\n");
         if (LastClicks.previousClicked != NULL) {//crash olmamasi icin eklendi, bos olan bir adresin degerini degistirmeye calisacakti, boylece program cokecekti 
@@ -339,10 +344,13 @@ void processClick() {
         }
 
         LastClicks.previousClicked = LastClicks.lastClicked;//yeni onceki tiklanilani eski son tiklanilan yapar
+        if (LastClicks.previousClicked != NULL) {
+            LastClicks.previousClicked->color = RAYWHITE;//yeni onceki tiklanilani eski son tiklanilan yapar
+        }
         LastClicks.lastClicked = pointer;//son tiklanilani alir
         LastClicks.lastClicked->color = RED;//son tiklanilani kirmizi yapar
 
-        if (removable(LastClicks) == true) {//son 2 tas kaldirilabilir tas mi?
+        if (removable(LastClicks.lastClicked, LastClicks.previousClicked) == true) {//son 2 tas kaldirilabilir tas mi?
             addBegin(&head, &LastClicks);//linked liste ekle (masadan kaldir)
         }
     }
@@ -364,6 +372,9 @@ void addBegin(node** head, LastTwoClicked* LastClicks) {
     newNode->data1->isExists = false; // son tiklanilan taslarin cizilemez ve tiklanilamaz olmasi icin 
     newNode->data2->isExists = false;
 
+    isExist[newNode->data1->order] = 0;//linked liste eklerken o taşa karşılık değer 0 oldu
+    isExist[newNode->data2->order] = 0;
+
     LastClicks->lastClicked = NULL; //son 2 tiklanilan tas bilgisini sifirla
     LastClicks->previousClicked = NULL;
 
@@ -375,13 +386,16 @@ void addBegin(node** head, LastTwoClicked* LastClicks) {
 
 void deleteBegin(node** head) {
     if (*head == NULL) {//linked listten kaldirilacak oge yok, linked list zaten bos
-        printf("Linked list is already empty\n");
+        // printf("Linked list is already empty\n");
         return;
     }
     node* tempNode = *head;
 
-    (*head)->data1->isExists = true;//linked listten silerken cizilebilir hale getir
-    (*head)->data2->isExists = true;
+    tempNode->data1->isExists = true;//linked listten silerken cizilebilir hale getir
+    tempNode->data2->isExists = true;
+
+    isExist[tempNode->data1->order] = 1;//linked listten silerken o taşa karşılık değer 1 oldu
+    isExist[tempNode->data2->order] = 1;
 
     (*head)->data1->color = RAYWHITE;//linked listten silerken renklerini normal haline getir
     (*head)->data2->color = RAYWHITE;
@@ -393,14 +407,13 @@ void deleteBegin(node** head) {
 }
 
 void shuffle_all() {
-    shuffle(shuffled, ARRAY_SIZE);
+    shuffleBasedOnCondition(original, isExist, ARRAY_SIZE, 1);
     for (int i = 0, a = 0; i < LAYER; i++) {
         for (int j = 0; j < ARRAY_Y; j++) {
-            for (int k = 0; k < ARRAY_X; k++) {
-                if (tiles[j][k][i].isExists == true) {
-                    tiles[j][k][i].id = shuffled[a];//taslari karilmis desteden sec
-                    tiles[j][k][i].texture = textures[shuffled[a] - 1];//desteden secilen sayiya gore tasa sekil atamasi yap
-                    a++;
+            for (int k = 0; k < ARRAY_X; k++, a++) {
+                if (tiles[j][k][i].isExists == true && isExist[tiles[j][k][i].order] == 1) {
+                    tiles[j][k][i].id = original[tiles[j][k][i].order];//taslari karilmis desteden sec
+                    tiles[j][k][i].texture = textures[tiles[j][k][i].id];//desteden secilen sayiya gore tasa sekil atamasi yap
                 }
             }
         }
@@ -408,17 +421,48 @@ void shuffle_all() {
 }
 
 // son tiklanilan 2 tas masadan kaldirilabilir mi? YES : NO
-bool removable(LastTwoClicked LastClicks) {//son tiklanilan 2 tasi parametre olarak alir
-    if (LastClicks.lastClicked == NULL || LastClicks.previousClicked == NULL) {//son tiklanilan 2 tastan bir tanesi NULL ise false doner, program crash olmamasi icin 
+bool removable(tile* tile1, tile* tile2) {//son tiklanilan 2 tasi parametre olarak alir
+    if (tile1 == NULL || tile2 == NULL) {//son tiklanilan 2 tastan bir tanesi NULL ise false doner, program crash olmamasi icin 
         return false;
     }
-    if (LastClicks.lastClicked->id != LastClicks.previousClicked->id) {//eger taslarin simgeleri ayni degilse bunlar masadan kaldirilamaz
+    if (tile1->id != tile2->id) {//eger taslarin simgeleri ayni degilse bunlar masadan kaldirilamaz
         return false;
     }
-    if ((LastClicks.lastClicked->x == LastClicks.previousClicked->x)//eger ayni tasa 2 kere cift tiklarsan masadan kalkmamasi icin 
-        && (LastClicks.lastClicked->y == LastClicks.previousClicked->y)
-        && (LastClicks.lastClicked->z == LastClicks.previousClicked->z)) {
+    if ((tile1->x == tile2->x)//eger ayni tasa 2 kere cift tiklarsan masadan kalkmamasi icin 
+        && (tile1->y == tile2->y)
+        && (tile1->z == tile2->z)) {
         return false;
     }
     return true;
+}
+
+void shuffleBasedOnCondition(int* a, int* b, int size, int x) {
+    srand(time(NULL));  // Seed the random number generator
+
+    // Dynamically allocate memory to store indices where b[i] == 1
+    int* indices = (int*)malloc(size * sizeof(int));
+    if (indices == NULL) {
+        return; // Return if memory allocation failed
+    }
+
+    // Collect indices where b[i] == 1
+    int count = 0;
+    for (int i = 0; i < size; i++) {
+        if (b[i] == x) {
+            indices[count++] = i;
+        }
+    }
+
+    // Shuffle elements in a according to collected indices
+    // Only shuffle elements where b[i] == 1
+    for (int i = count - 1; i > 0; i--) {
+        int j = rand() % (i + 1);  // Generate a random index
+        // Swap the elements at indices[i] and indices[j]
+        int temp = a[indices[i]];
+        a[indices[i]] = a[indices[j]];
+        a[indices[j]] = temp;
+    }
+
+    // Free the dynamically allocated memory
+    free(indices);
 }
