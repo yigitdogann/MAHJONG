@@ -22,7 +22,7 @@ typedef struct tile {
     int id; //shuffled, tür
     int order;
     bool isExists; //newMap, konum
-    bool isRemovable;
+    bool isClickable;
 
     Rectangle rectangle;
     Texture2D texture;
@@ -41,12 +41,13 @@ typedef struct node {
     struct node* nextNode;
 }node;
 
-typedef enum gameScreen { Starting, Game, Options };
-gameScreen = Starting;
+//typedef enum gameScreen { Starting, Game, Options };
+//gameScreen = Starting;
 LastTwoClicked LastClicks;
-
+LastTwoClicked hint;
 int map[ARRAY_Y][ARRAY_X];
 int newMap[ARRAY_Y][ARRAY_X][LAYER] = { 0 };
+int clickable_freq[NUM_IMAGES] = { 0 };
 
 int original[ARRAY_SIZE];
 int shuffled[ARRAY_SIZE];
@@ -54,11 +55,14 @@ int isExist[ARRAY_SIZE] = { 0 };
 
 tile tiles[ARRAY_Y][ARRAY_X][LAYER];
 int values[ARRAY_Y][ARRAY_X];
+
 Vector2 mousePosition;
+Vector2 shuffleCircle;
+Vector2 hintCircle;
 const int screenWidth = 1440;
 const int screenHeight = 900;
 int framesCounter = 0; // Useful to count frames
-Vector2 shuffleCircle;
+
 bool isClickable(tile* tile);
 bool removable(tile* tile1, tile* tile2);
 void InitGame();
@@ -73,6 +77,7 @@ void deleteBegin(node** head);
 void shuffle_all();
 tile* getTopMostTile(tile tiles[ARRAY_Y][ARRAY_X][LAYER], Vector2 mousePosition);
 Color GetBlockColor(int point);
+void giveHint();
 FILE* file;
 node* head = NULL; //linked list head pointer 
 
@@ -98,6 +103,8 @@ void InitGame() {
 
     shuffleCircle.x = (float)1240;
     shuffleCircle.y = (float)450;
+    hintCircle.x = (float)1240;
+    hintCircle.y = (float)350;
 
     for (int i = 0; i < ARRAY_SIZE; i++) {
         isExist[i] = 0;
@@ -179,12 +186,12 @@ void InitGame() {
 
                 tiles[j][k][i].rectangle.x = (float)(k * WIDTH / 2 - i * 10); //taslarin x ve y degerleri girildi, i ile carpim 3 boyun goruntusu kazandirmak icin eklendi
                 tiles[j][k][i].rectangle.y = (float)(j * HEIGHT / 2 - i * 10);
-
+                
                 tiles[j][k][i].rectangle.width = (float)WIDTH; //tasin yuksekligi
                 tiles[j][k][i].rectangle.height = (float)HEIGHT;// tasin uzunlugu
                 if (tiles[j][k][i].isExists == true) {// eger tas var ise
                     tiles[j][k][i].color = RAYWHITE;//tasi normal renk tonunda ciz, (farkli renk koyup degisiklikler gozlenebilir)
-                    tiles[j][k][i].id = shuffled[a]; //taslari karistirildi ve cizilmesi gerekenlere sirayla atanacak
+                    tiles[j][k][i].id = original[a]; //taslari karistirildi ve cizilmesi gerekenlere sirayla atanacak
                     tiles[j][k][i].texture = textures[original[a]];
                     tiles[j][k][i].order = a;
                     isExist[a]++;
@@ -193,7 +200,6 @@ void InitGame() {
             }
         }
     }
-
 }
 
 void drawGame() {
@@ -201,6 +207,7 @@ void drawGame() {
     DrawTexture(backGroundTexture, 0, 0, WHITE);
 
     DrawCircleV(shuffleCircle, 30.0, GOLD);
+    DrawCircleV(hintCircle, 30.0, BLUE);
     for (int k = 1, a = 0; k < LAYER; k++) {
         for (int i = 0; i < ARRAY_Y; i++) {
             for (int j = 0; j < ARRAY_X; j++) {
@@ -225,16 +232,16 @@ void randomFiller() {
     }
 
     shuffleBasedOnCondition(original, isExist, ARRAY_SIZE, 0);
-    for (int i = 0; i < ARRAY_SIZE; i++) {
+    /*for (int i = 0; i < ARRAY_SIZE; i++) {
         printf("%d", original[i]);
     }
     for (int i = 0; i < ARRAY_SIZE; i++) {
         printf("%d", isExist[i]);
-    }
-    // Karıştırılmış diziyi yeni bir diziye kopyala
-    for (int i = 0; i < ARRAY_SIZE; i++) {
-        shuffled[i] = original[i];
-    }
+    }*/
+    //// Karıştırılmış diziyi yeni bir diziye kopyala
+    //for (int i = 0; i < ARRAY_SIZE; i++) {
+    //    shuffled[i] = original[i];
+    //}
 }
 
 // Fisher-Yates shuffle algorithm
@@ -250,11 +257,14 @@ void shuffle(int* array, int n) {
 void updateGame() {
     mousePosition = GetMousePosition();
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) == true) {
-        if (!CheckCollisionPointCircle(mousePosition, shuffleCircle, 30.0)) {
+        if (!CheckCollisionPointCircle(mousePosition, shuffleCircle, 30.0) && !CheckCollisionPointCircle(mousePosition, hintCircle, 30.0)) {
             processClick();
         }
-        else {
+        else if(CheckCollisionPointCircle(mousePosition, shuffleCircle, 30.0)){
             shuffle_all();
+        }
+        else if(CheckCollisionPointCircle(mousePosition, hintCircle, 30.0)){
+            giveHint();
         }
     }
 }
@@ -289,7 +299,9 @@ bool isClickable(tile* tile) {
     if (tile == NULL) {
         return false;
     }
-
+    if (tile->isExists != true) {
+        return false;
+    }
     int x = tile->x;
     int y = tile->y;
     int z = tile->z;
@@ -336,7 +348,8 @@ void processClick() {
     tile* pointer = NULL;
 
     pointer = getTopMostTile(tiles, mousePosition);// imlec ile tiklanilan tasi point eder
-    if (pointer != NULL)printf("order: %d", pointer->order);
+    if (pointer != NULL)printf("order: %d\n", pointer->order);
+    if (pointer != NULL)printf("isClickable: %d", pointer->isClickable);
     if (isClickable(pointer) && LastClicks.lastClicked != pointer) {//tiklanilan bir tas ise && eger son tiklanilan tasa bir kez daha tiklanirsa 2. isaretlemeyi kabul etmez
         printf("buraya girdi\n");
         if (LastClicks.previousClicked != NULL) {//crash olmamasi icin eklendi, bos olan bir adresin degerini degistirmeye calisacakti, boylece program cokecekti 
@@ -399,6 +412,7 @@ void deleteBegin(node** head) {
 
     (*head)->data1->color = RAYWHITE;//linked listten silerken renklerini normal haline getir
     (*head)->data2->color = RAYWHITE;
+
 
     *head = (*head)->nextNode;//basa eklemeli linked list oldugu icin listen artik bir sonraki next node ile temsil ediliyor, ilk elemani cikartacagiz
     //add begin - delete begin 
@@ -465,4 +479,73 @@ void shuffleBasedOnCondition(int* a, int* b, int size, int x) {
 
     // Free the dynamically allocated memory
     free(indices);
+}
+
+void giveHint() {
+    
+    for (int i = 0; i < LAYER; i++) {
+        for (int j = 0; j < ARRAY_Y; j++) {
+            for (int k = 0; k < ARRAY_X; k++) {
+                tiles[j][k][i].isClickable = isClickable(&tiles[j][k][i]);
+                //printf(" %d ", tiles[j][k][i].id);
+                if (tiles[j][k][i].isClickable == 1) {
+                    clickable_freq[tiles[j][k][i].id] += 1;
+                }
+            }
+        }
+    }
+    //for (int i = 0; i < NUM_IMAGES; i++) {
+    //    printf(" %d ", clickable_freq[i]);
+    //    //printf("%d ", hintedId);
+    //}
+
+    int hintedId;
+    for (int i = 0; i < NUM_IMAGES; i++){
+        if (clickable_freq[i] >= 2) {
+            hintedId = i;
+            //printf("\n hintedId: %d ", hintedId);
+        }
+    }
+
+    printf("%d", hintedId);
+    for (int i = 0; i < LAYER; i++) {
+        for (int j = 0; j < ARRAY_Y; j++) {
+            for (int k = 0; k < ARRAY_X; k++) {
+                if (tiles[j][k][i].id == hintedId && tiles[j][k][i].isClickable) {
+                    if (hint.lastClicked == NULL) {
+                        hint.lastClicked = &tiles[j][k][i];
+                    }
+                    else if (hint.previousClicked == NULL) {
+                        hint.previousClicked = &tiles[j][k][i];
+                        goto yer;
+                    }
+                }
+            }
+        }
+    }
+    /*for (int i = 0; i < NUM_IMAGES; i++) {
+        printf("%d ", clickable_freq[i]);
+    }*/
+    yer:
+    if (hint.lastClicked != NULL) {
+        hint.lastClicked->color = BLUE;
+    }
+    else {
+        printf("nulll");
+    }
+    if (hint.previousClicked != NULL){
+        hint.previousClicked->color = BLUE;
+    }
+    else {
+        printf("nuxxx");
+    }
+    for (int i = 0; i < NUM_IMAGES; i++) {
+        clickable_freq[i] = 0;
+    }
+    for (int i = 0; i < NUM_IMAGES; i++) {
+        printf("%d ", clickable_freq[i]);
+
+    }
+    hint.lastClicked = NULL;
+    hint.previousClicked = NULL;
 }

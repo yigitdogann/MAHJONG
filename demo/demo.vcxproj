@@ -141,6 +141,8 @@
     <Text Include="..\assets\license.txt" />
     <Text Include="..\assets\map1.txt" />
     <Text Include="..\assets\map2.txt" />
+    <Text Include="..\assets\map3.txt" />
+    <Text Include="..\assets\map4.txt" />
     <Text Include="..\assets\original-map.txt" />
   </ItemGroup>
   <ItemGroup>
