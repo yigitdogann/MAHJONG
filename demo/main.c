@@ -112,7 +112,7 @@ void InitGame() {
 
     randomFiller();
     //read map from text file
-    file = fopen("../assets/map2.txt", "r"); //dosyayi oku 
+    file = fopen("../assets/map3.txt", "r"); //dosyayi oku 
     if (file == NULL) { //dosyayi okumazsan konsola error ver
         perror("Failed to open file");
         return;
@@ -346,7 +346,13 @@ bool isClickable(tile* tile) {
 
 void processClick() {
     tile* pointer = NULL;
+    if(hint.lastClicked != NULL && hint.previousClicked != NULL){
+        hint.lastClicked->color = RAYWHITE;
+        hint.previousClicked->color = RAYWHITE;
 
+        hint.lastClicked = NULL;
+        hint.previousClicked = NULL;
+    }
     pointer = getTopMostTile(tiles, mousePosition);// imlec ile tiklanilan tasi point eder
     if (pointer != NULL)printf("order: %d\n", pointer->order);
     if (pointer != NULL)printf("isClickable: %d", pointer->isClickable);
@@ -527,25 +533,13 @@ void giveHint() {
         printf("%d ", clickable_freq[i]);
     }*/
     yer:
-    if (hint.lastClicked != NULL) {
-        hint.lastClicked->color = BLUE;
-    }
-    else {
-        printf("nulll");
-    }
-    if (hint.previousClicked != NULL){
-        hint.previousClicked->color = BLUE;
-    }
-    else {
-        printf("nuxxx");
-    }
+   
+    hint.lastClicked->color = BLUE;
+    hint.previousClicked->color = BLUE;
     for (int i = 0; i < NUM_IMAGES; i++) {
         clickable_freq[i] = 0;
     }
     for (int i = 0; i < NUM_IMAGES; i++) {
         printf("%d ", clickable_freq[i]);
-
     }
-    hint.lastClicked = NULL;
-    hint.previousClicked = NULL;
 }
