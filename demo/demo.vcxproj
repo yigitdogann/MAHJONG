@@ -146,42 +146,7 @@
     <Text Include="..\assets\original-map.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\assets\exact-tiles\exact-tiles\1.png" />
-    <Image Include="..\assets\exact-tiles\exact-tiles\10.png" />
-    <Image Include="..\assets\exact-tiles\exact-tiles\11.png" />
-    <Image Include="..\assets\exact-tiles\exact-tiles\12.png" />
-    <Image Include="..\assets\exact-tiles\exact-tiles\13.png" />
-    <Image Include="..\assets\exact-tiles\exact-tiles\14.png" />
-    <Image Include="..\assets\exact-tiles\exact-tiles\15.png" />
-    <Image Include="..\assets\exact-tiles\exact-tiles\16.png" />
-    <Image Include="..\assets\exact-tiles\exact-tiles\17.png" />
-    <Image Include="..\assets\exact-tiles\exact-tiles\18.png" />
-    <Image Include="..\assets\exact-tiles\exact-tiles\19.png" />
-    <Image Include="..\assets\exact-tiles\exact-tiles\2.png" />
-    <Image Include="..\assets\exact-tiles\exact-tiles\20.png" />
-    <Image Include="..\assets\exact-tiles\exact-tiles\21.png" />
-    <Image Include="..\assets\exact-tiles\exact-tiles\22.png" />
-    <Image Include="..\assets\exact-tiles\exact-tiles\23.png" />
-    <Image Include="..\assets\exact-tiles\exact-tiles\24.png" />
-    <Image Include="..\assets\exact-tiles\exact-tiles\25.png" />
-    <Image Include="..\assets\exact-tiles\exact-tiles\26.png" />
-    <Image Include="..\assets\exact-tiles\exact-tiles\27.png" />
-    <Image Include="..\assets\exact-tiles\exact-tiles\28.png" />
-    <Image Include="..\assets\exact-tiles\exact-tiles\29.png" />
-    <Image Include="..\assets\exact-tiles\exact-tiles\3.png" />
-    <Image Include="..\assets\exact-tiles\exact-tiles\30.png" />
-    <Image Include="..\assets\exact-tiles\exact-tiles\31.png" />
-    <Image Include="..\assets\exact-tiles\exact-tiles\32.png" />
-    <Image Include="..\assets\exact-tiles\exact-tiles\33.png" />
-    <Image Include="..\assets\exact-tiles\exact-tiles\34.png" />
-    <Image Include="..\assets\exact-tiles\exact-tiles\35.png" />
-    <Image Include="..\assets\exact-tiles\exact-tiles\36.png" />
-    <Image Include="..\assets\exact-tiles\exact-tiles\4.png" />
-    <Image Include="..\assets\exact-tiles\exact-tiles\5.png" />
-    <Image Include="..\assets\exact-tiles\exact-tiles\6.png" />
-    <Image Include="..\assets\exact-tiles\exact-tiles\7.png" />
-    <Image Include="..\assets\exact-tiles\exact-tiles\8.png" />
-    <Image Include="..\assets\exact-tiles\exact-tiles\9.png" />
+    <Image Include="..\assets\bg-first.png" />
     <Image Include="..\assets\mahjong-map-2.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

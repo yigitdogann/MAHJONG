@@ -1,7 +1,9 @@
-﻿#include <raylib.h>
+﻿#define RAYGUI_IMPLEMENTATION
+#include <raylib.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <raygui.h>
 
 #define WIDTH 70
 #define HEIGHT 96
@@ -14,8 +16,8 @@
 Image images[NUM_IMAGES];    // Array to hold image data
 Texture2D textures[NUM_IMAGES]; // Array to hold textures
 
-Image backGround;    // background
-Texture2D backGroundTexture;
+Image backGround[2];    // background
+Texture2D backGroundTexture[2];
 
 typedef struct tile {
     int point;//point of tile, tür
@@ -35,16 +37,26 @@ typedef struct LastTwoClicked {
     tile* lastClicked;
 }LastTwoClicked;
 
+typedef struct gameState{
+    // Define game state variables
+    bool isGameActive;
+    bool runbefore;
+
+    // Additional game states like current level, score, etc.
+} GameState;
+
 typedef struct node {
     tile* data1;
     tile* data2;
     struct node* nextNode;
 }node;
 
-//typedef enum gameScreen { Starting, Game, Options };
-//gameScreen = Starting;
+typedef enum screen { starting, game } screen;
+screen gameScreen = starting;
+
 LastTwoClicked LastClicks;
 LastTwoClicked hint;
+
 int map[ARRAY_Y][ARRAY_X];
 int newMap[ARRAY_Y][ARRAY_X][LAYER] = { 0 };
 int clickable_freq[NUM_IMAGES] = { 0 };
@@ -54,8 +66,6 @@ int shuffled[ARRAY_SIZE];
 int isExist[ARRAY_SIZE] = { 0 };
 
 tile tiles[ARRAY_Y][ARRAY_X][LAYER];
-int values[ARRAY_Y][ARRAY_X];
-
 Vector2 mousePosition;
 Vector2 shuffleCircle;
 Vector2 hintCircle;
@@ -65,11 +75,10 @@ int framesCounter = 0; // Useful to count frames
 
 bool isClickable(tile* tile);
 bool removable(tile* tile1, tile* tile2);
-void InitGame();
+void SelectScreen();
 void updateGame();
 void drawGame();
 void shuffleBasedOnCondition(int* a, int* b, int size, int x);
-void shuffle(int* array, int n);
 void randomFiller();
 void processClick();
 void addBegin(node** head, LastTwoClicked* LastClicks);
@@ -77,18 +86,24 @@ void deleteBegin(node** head);
 void shuffle_all();
 tile* getTopMostTile(tile tiles[ARRAY_Y][ARRAY_X][LAYER], Vector2 mousePosition);
 Color GetBlockColor(int point);
-void giveHint();
+int giveHint();
+void remover();
+void InitMap();
+void InitObjects(); 
+void InitImages();
+
+GameState gameState = { 0 };
 FILE* file;
 node* head = NULL; //linked list head pointer 
 
 int main(void) {
     InitWindow(screenWidth, screenHeight, "Mahjong Game");//pencere genislik X yukseklik, pencere adi 
     SetTargetFPS(60);
-    InitGame();
-
+    backGround[0] = LoadImage("../assets/bg-first.png"); //arkaplan ekleme 
+    backGroundTexture[0] = LoadTextureFromImage(backGround[0]);
+    UnloadImage(backGround[0]);
     while (!WindowShouldClose())
     {
-        updateGame(); //oyundaki degerleri update et
         drawGame();
     }
 
@@ -97,32 +112,75 @@ int main(void) {
     return 0;
 }
 
-void InitGame() {
-    LastClicks.lastClicked = NULL;
-    LastClicks.previousClicked = NULL;
-
-    shuffleCircle.x = (float)1240;
-    shuffleCircle.y = (float)450;
-    hintCircle.x = (float)1240;
-    hintCircle.y = (float)350;
-
-    for (int i = 0; i < ARRAY_SIZE; i++) {
-        isExist[i] = 0;
+void drawGame() {
+    BeginDrawing();
+    switch (gameScreen) {
+    case starting:
+        DrawTexture(backGroundTexture[0], 0, 0, WHITE);
+        if (GuiButton((Rectangle) { screenWidth / 2 + 250, screenHeight / 2 - 150, 100, 30 }, "EASY")) {
+            file = fopen("../assets/map2.txt", "r"); //dosyayi oku 
+            if (file == NULL) { //dosyayi okumazsan konsola error ver
+                perror("Failed to open file");
+                return;
+            }
+            gameState.isGameActive = true;
+        }
+        else if (GuiButton((Rectangle) { screenWidth / 2 + 250, screenHeight / 2 - 50, 100, 30 }, "NORMAL")) {
+            file = fopen("../assets/map1.txt", "r"); //dosyayi oku 
+            if (file == NULL) { //dosyayi okumazsan konsola error ver
+                perror("Failed to open file");
+                return;
+            }
+            gameState.isGameActive = true;
+        }
+        else if (GuiButton((Rectangle) { screenWidth / 2 + 250, screenHeight / 2 + 50, 100, 30 }, "EXPERT")) {
+            file = fopen("../assets/map3.txt", "r"); //dosyayi oku 
+            if (file == NULL) { //dosyayi okumazsan konsola error ver
+                perror("Failed to open file");
+                return;
+            }
+            gameState.isGameActive = true;
+        }
+        if (gameState.isGameActive == true && gameState.runbefore == false) {
+            InitImages();
+            InitMap();
+            InitObjects();
+            free(file);
+            gameScreen = game;
+        }
+        if (gameState.isGameActive == true && gameState.runbefore == true) {
+            
+            InitMap();
+            InitObjects();
+            gameScreen = game;
+        }
+    case game:
+    if(gameState.isGameActive == true){  
+        DrawTexture(backGroundTexture[1], 0, 0, WHITE);
+        for (int k = 1, a = 0; k < LAYER; k++) {
+            for (int i = 0; i < ARRAY_Y; i++) {
+                for (int j = 0; j < ARRAY_X; j++) {
+                    if (tiles[i][j][k].isExists == true) {
+                        DrawTexture(tiles[i][j][k].texture, tiles[i][j][k].rectangle.x, tiles[i][j][k].rectangle.y, tiles[i][j][k].color);
+                    }
+                }
+            }
+        }
+        updateGame(); //oyundaki degerleri update et
     }
-
-    randomFiller();
-    //read map from text file
-    file = fopen("../assets/map3.txt", "r"); //dosyayi oku 
-    if (file == NULL) { //dosyayi okumazsan konsola error ver
-        perror("Failed to open file");
-        return;
+        default: break;
     }
+    //framesCounter++;
+    EndDrawing();
+}
+
+void InitMap() {
     int x, y;
-
+    
     // Reading the file into a 2D array
     for (y = 0; y < ARRAY_Y; y++) {
         for (x = 0; x < ARRAY_X; x++) {
-            if (fscanf(file, "%1d", &map[y][x]) != 1) {
+            if (fscanf(file, "%1d", &map[y][x]) == NULL) {
                 perror("Failed to read data");
                 return;
             }
@@ -130,29 +188,6 @@ void InitGame() {
     }
 
     fclose(file);  // Always close the file after you're done reading
-
-    /*
-    // Print original map for debugging
-    for (int i = 0; i < ARRAY_Y; i++) {
-        for (int j = 0; j < ARRAY_X; j++) {
-            printf("%d", map[i][j]);
-        }
-        puts("");
-    }
-    */
-
-    backGround = LoadImage("../assets/bg-black.png"); //arkaplan ekleme 
-    backGroundTexture = LoadTextureFromImage(backGround);
-    UnloadImage(backGround);
-
-    for (int i = 0; i < NUM_IMAGES; i++) {
-        char filePath[NUM_IMAGES]; // Buffer to hold the file path
-        sprintf(filePath, "../assets/tiles/%d.png", i); // Create file path, note images are 1-indexed in your folder
-
-        images[i] = LoadImage(filePath); // Load image data into CPU memory (RAM)
-        textures[i] = LoadTextureFromImage(images[i]); // Image converted to texture, GPU memory (RAM -> VRAM)
-        UnloadImage(images[i]); // Unload image data from CPU memory (RAM)
-    }
 
     for (int k = LAYER - 1; k > 0; k--) { //mapi okumak icin once en ust kati oku
         for (int i = 0; i < HEIGHT - 1; i++) { //arrayin dikey degerlerini oku
@@ -167,14 +202,22 @@ void InitGame() {
             }
         }
     }
-    //// Print new map for debugging
-    //for (int i = 0; i < ARRAY_Y; i++) {
-    //    for (int j = 0; j < ARRAY_X; j++) {
-    //        printf("%d", newMap[i][j][5]);
-    //    }
-    //    puts("");
-    //}
-    //puts("");
+}
+
+void InitObjects() {
+    LastClicks.lastClicked = NULL;
+    LastClicks.previousClicked = NULL;
+
+    shuffleCircle.x = (float)1240;
+    shuffleCircle.y = (float)450;
+    hintCircle.x = (float)1240;
+    hintCircle.y = (float)350;
+
+    for (int i = 0; i < ARRAY_SIZE; i++) {
+        isExist[i] = 0;
+    }
+    randomFiller();
+
     for (int i = 0, a = 0; i < LAYER; i++) {
         for (int j = 0; j < ARRAY_Y; j++) {
             for (int k = 0; k < ARRAY_X; k++) {
@@ -186,7 +229,7 @@ void InitGame() {
 
                 tiles[j][k][i].rectangle.x = (float)(k * WIDTH / 2 - i * 10); //taslarin x ve y degerleri girildi, i ile carpim 3 boyun goruntusu kazandirmak icin eklendi
                 tiles[j][k][i].rectangle.y = (float)(j * HEIGHT / 2 - i * 10);
-                
+
                 tiles[j][k][i].rectangle.width = (float)WIDTH; //tasin yuksekligi
                 tiles[j][k][i].rectangle.height = (float)HEIGHT;// tasin uzunlugu
                 if (tiles[j][k][i].isExists == true) {// eger tas var ise
@@ -202,27 +245,19 @@ void InitGame() {
     }
 }
 
-void drawGame() {
-    BeginDrawing();
-    DrawTexture(backGroundTexture, 0, 0, WHITE);
+void InitImages() {
+    backGround[1] = LoadImage("../assets/bg-black.png"); //arkaplan ekleme 
+    backGroundTexture[1] = LoadTextureFromImage(backGround[1]);
+    UnloadImage(backGround[1]);
 
-    DrawCircleV(shuffleCircle, 30.0, GOLD);
-    DrawCircleV(hintCircle, 30.0, BLUE);
-    for (int k = 1, a = 0; k < LAYER; k++) {
-        for (int i = 0; i < ARRAY_Y; i++) {
-            for (int j = 0; j < ARRAY_X; j++) {
-                if (tiles[i][j][k].isExists == true) {
-                    //@Color color = GetBlockColor(k);
-                    DrawTexture(tiles[i][j][k].texture, tiles[i][j][k].rectangle.x, tiles[i][j][k].rectangle.y, tiles[i][j][k].color);
-                    //@DrawCircle(tiles[i][j][k].rectangle.x, tiles[i][j][k].rectangle.y, 5, color);
-                    //@a++;
-                }
-            }
-        }
+    for (int i = 0; i < NUM_IMAGES; i++) {
+        char filePath[NUM_IMAGES]; // Buffer to hold the file path
+        sprintf(filePath, "../assets/tiles/%d.png", i); // Create file path, note images are 1-indexed in your folder
+
+        images[i] = LoadImage(filePath); // Load image data into CPU memory (RAM)
+        textures[i] = LoadTextureFromImage(images[i]); // Image converted to texture, GPU memory (RAM -> VRAM)
+        UnloadImage(images[i]); // Unload image data from CPU memory (RAM)
     }
-
-
-    EndDrawing();
 }
 
 void randomFiller() {
@@ -244,29 +279,29 @@ void randomFiller() {
     //}
 }
 
-// Fisher-Yates shuffle algorithm
-void shuffle(int* array, int n) {
-    for (int i = n - 1; i > 0; i--) {
-        int j = rand() % (i + 1);
-        int temp = array[i];
-        array[i] = array[j];
-        array[j] = temp;
-    }
-}
-
 void updateGame() {
     mousePosition = GetMousePosition();
-    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) == true) {
-        if (!CheckCollisionPointCircle(mousePosition, shuffleCircle, 30.0) && !CheckCollisionPointCircle(mousePosition, hintCircle, 30.0)) {
+    
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
             processClick();
         }
-        else if(CheckCollisionPointCircle(mousePosition, shuffleCircle, 30.0)){
+        if (GuiButton((Rectangle) { screenWidth / 2 + 500, screenHeight / 2 - 350, 100, 30 }, "SHUFFLE")) {
             shuffle_all();
         }
-        else if(CheckCollisionPointCircle(mousePosition, hintCircle, 30.0)){
+        if (GuiButton((Rectangle) { screenWidth / 2 + 500, screenHeight / 2 - 250, 100, 30 }, "HINT")) {
+            remover();
             giveHint();
+            
         }
-    }
+        if (GuiButton((Rectangle) { screenWidth / 2 + 500, screenHeight / 2 - 150, 100, 30 }, "UNDO")) {
+            deleteBegin(&head);
+        }
+        if (GuiButton((Rectangle) { screenWidth / 2 + 500, screenHeight / 2 - 50, 100, 30 }, "MAIN")) {
+            gameScreen = starting;
+            gameState.isGameActive = false;
+            gameState.runbefore = true;
+        }
+ 
 }
 
 //color according to points (drawing fonksiyonunda fazladan if/else kurmaktan kacinildi)
@@ -330,7 +365,9 @@ bool isClickable(tile* tile) {
     if (tiles[y - 1][x][z + 1].isExists == true) {
         return false;
     }
-
+    if (tiles[y][x-1][z + 1].isExists == true) {
+        return false;
+    }
     bool right = tiles[y - 1][x + 2][z].isExists || tiles[y][x + 2][z].isExists || tiles[y + 1][x + 2][z].isExists;
     //üst kat
 
@@ -346,16 +383,16 @@ bool isClickable(tile* tile) {
 
 void processClick() {
     tile* pointer = NULL;
-    if(hint.lastClicked != NULL && hint.previousClicked != NULL){
+    if (hint.lastClicked != NULL) {
         hint.lastClicked->color = RAYWHITE;
-        hint.previousClicked->color = RAYWHITE;
-
-        hint.lastClicked = NULL;
-        hint.previousClicked = NULL;
     }
+    if (hint.previousClicked != NULL) {
+        hint.previousClicked->color = RAYWHITE;
+    }
+
     pointer = getTopMostTile(tiles, mousePosition);// imlec ile tiklanilan tasi point eder
-    if (pointer != NULL)printf("order: %d\n", pointer->order);
-    if (pointer != NULL)printf("isClickable: %d", pointer->isClickable);
+    /*if (pointer != NULL)printf("order: %d\n", pointer->order);
+    if (pointer != NULL)printf("isClickable: %d", pointer->isClickable);*/
     if (isClickable(pointer) && LastClicks.lastClicked != pointer) {//tiklanilan bir tas ise && eger son tiklanilan tasa bir kez daha tiklanirsa 2. isaretlemeyi kabul etmez
         printf("buraya girdi\n");
         if (LastClicks.previousClicked != NULL) {//crash olmamasi icin eklendi, bos olan bir adresin degerini degistirmeye calisacakti, boylece program cokecekti 
@@ -372,9 +409,6 @@ void processClick() {
         if (removable(LastClicks.lastClicked, LastClicks.previousClicked) == true) {//son 2 tas kaldirilabilir tas mi?
             addBegin(&head, &LastClicks);//linked liste ekle (masadan kaldir)
         }
-    }
-    if (pointer == NULL) { // tas olmayan yerlere tiklanilirsa 
-        deleteBegin(&head); //linked listten cikar (masaya kaldirilan son cifti geri ekler)
     }
     return;
 }
@@ -409,7 +443,7 @@ void deleteBegin(node** head) {
         return;
     }
     node* tempNode = *head;
-
+    
     tempNode->data1->isExists = true;//linked listten silerken cizilebilir hale getir
     tempNode->data2->isExists = true;
 
@@ -419,7 +453,13 @@ void deleteBegin(node** head) {
     (*head)->data1->color = RAYWHITE;//linked listten silerken renklerini normal haline getir
     (*head)->data2->color = RAYWHITE;
 
-
+    if (LastClicks.lastClicked != NULL) {
+        LastClicks.lastClicked->color = RAYWHITE;//son tıklanılanı rengini siler
+        LastClicks.lastClicked = NULL;//son tıklanılan geçmişini unutur.
+    }
+    if (LastClicks.previousClicked != NULL) {
+        LastClicks.previousClicked = NULL;
+    }
     *head = (*head)->nextNode;//basa eklemeli linked list oldugu icin listen artik bir sonraki next node ile temsil ediliyor, ilk elemani cikartacagiz
     //add begin - delete begin 
 
@@ -427,6 +467,13 @@ void deleteBegin(node** head) {
 }
 
 void shuffle_all() {
+    if (hint.lastClicked != NULL && hint.previousClicked != NULL) {
+        hint.lastClicked->color = RAYWHITE;
+        hint.previousClicked->color = RAYWHITE;
+
+        hint.lastClicked = NULL;
+        hint.previousClicked = NULL;
+    }
     shuffleBasedOnCondition(original, isExist, ARRAY_SIZE, 1);
     for (int i = 0, a = 0; i < LAYER; i++) {
         for (int j = 0; j < ARRAY_Y; j++) {
@@ -437,6 +484,11 @@ void shuffle_all() {
                 }
             }
         }
+    }
+
+    if (hint.lastClicked != NULL && hint.previousClicked != NULL) { //karıştırma komutuna basarsan mavi ile işaretlenen taşları normal haline getirir
+        hint.lastClicked->color = RAYWHITE; 
+        hint.previousClicked->color = RAYWHITE;
     }
 }
 
@@ -487,8 +539,24 @@ void shuffleBasedOnCondition(int* a, int* b, int size, int x) {
     free(indices);
 }
 
-void giveHint() {
-    
+void remover() {
+    if (hint.lastClicked != NULL) {
+        hint.lastClicked = NULL;
+    }
+    if (hint.previousClicked != NULL) {
+        hint.previousClicked = NULL;
+    }
+}
+
+int giveHint() {
+    if (LastClicks.lastClicked != NULL) {
+        LastClicks.lastClicked->color = RAYWHITE;
+        LastClicks.lastClicked = NULL;
+    }
+    if (LastClicks.previousClicked!= NULL) {
+        LastClicks.previousClicked = NULL;
+    }
+
     for (int i = 0; i < LAYER; i++) {
         for (int j = 0; j < ARRAY_Y; j++) {
             for (int k = 0; k < ARRAY_X; k++) {
@@ -500,20 +568,17 @@ void giveHint() {
             }
         }
     }
-    //for (int i = 0; i < NUM_IMAGES; i++) {
-    //    printf(" %d ", clickable_freq[i]);
-    //    //printf("%d ", hintedId);
-    //}
 
-    int hintedId;
-    for (int i = 0; i < NUM_IMAGES; i++){
+    int hintedId = -1;
+    for (int i = 0; i < NUM_IMAGES; i++) {
         if (clickable_freq[i] >= 2) {
             hintedId = i;
-            //printf("\n hintedId: %d ", hintedId);
         }
     }
-
-    printf("%d", hintedId);
+    if (hintedId == -1) {
+        printf("there are no removable\n");
+        return 1;
+    }
     for (int i = 0; i < LAYER; i++) {
         for (int j = 0; j < ARRAY_Y; j++) {
             for (int k = 0; k < ARRAY_X; k++) {
@@ -529,17 +594,14 @@ void giveHint() {
             }
         }
     }
-    /*for (int i = 0; i < NUM_IMAGES; i++) {
-        printf("%d ", clickable_freq[i]);
-    }*/
+
     yer:
-   
-    hint.lastClicked->color = BLUE;
-    hint.previousClicked->color = BLUE;
+    if (hint.lastClicked != NULL && hint.previousClicked != NULL) {
+        hint.lastClicked->color = BLUE;
+        hint.previousClicked->color = BLUE;
+    }
     for (int i = 0; i < NUM_IMAGES; i++) {
         clickable_freq[i] = 0;
     }
-    for (int i = 0; i < NUM_IMAGES; i++) {
-        printf("%d ", clickable_freq[i]);
-    }
+    return 2;   
 }
