@@ -135,19 +135,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="globals.c" />
     <ClCompile Include="main.c" />
+    <ClCompile Include="utils.c" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="..\assets\license.txt" />
-    <Text Include="..\assets\map1.txt" />
-    <Text Include="..\assets\map2.txt" />
-    <Text Include="..\assets\map3.txt" />
-    <Text Include="..\assets\map4.txt" />
-    <Text Include="..\assets\original-map.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="..\assets\bg-first.png" />
-    <Image Include="..\assets\mahjong-map-2.png" />
+    <ClInclude Include="globals.h" />
+    <ClInclude Include="utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

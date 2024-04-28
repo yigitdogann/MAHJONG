@@ -18,29 +18,19 @@
     <ClCompile Include="main.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="utils.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="globals.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="..\assets\license.txt">
-      <Filter>Source Files</Filter>
-    </Text>
-    <Text Include="..\assets\map1.txt">
-      <Filter>Source Files</Filter>
-    </Text>
-    <Text Include="..\assets\map2.txt">
-      <Filter>Source Files</Filter>
-    </Text>
-    <Text Include="..\assets\original-map.txt">
-      <Filter>Source Files</Filter>
-    </Text>
-    <Text Include="..\assets\map3.txt" />
-    <Text Include="..\assets\map4.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="..\assets\mahjong-map-2.png">
-      <Filter>Source Files</Filter>
-    </Image>
-    <Image Include="..\assets\bg-first.png">
-      <Filter>Source Files</Filter>
-    </Image>
+    <ClInclude Include="globals.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
