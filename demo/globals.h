@@ -6,7 +6,6 @@
 #include <stdlib.h>
 #include <time.h>
 
-
 #define WIDTH 70
 #define HEIGHT 96
 #define ARRAY_Y 18
@@ -36,8 +35,9 @@ typedef struct LastTwoClicked {
 typedef struct GameState {
     // Define game state variables
     bool isGameActive;
-    bool runbefore;
+    //bool runbefore;
 
+    int remainingTile;
     int totalPoint;
     int combo;
     int matchable;
@@ -63,9 +63,14 @@ extern Texture2D textures[NUM_IMAGES]; // Array to hold textures
 extern Image backGround[2];    // background
 extern Texture2D backGroundTexture[2];
 
+extern Image symbols[6]; 
+extern Texture2D symbolsTexture[6];
+
 extern Sound gameSound;
 extern Sound buttonSound;
 extern Sound selectSound;
+extern Sound mapSelectionSound;
+extern Sound gameButtonSound;
 
 extern screen gameScreen;
 extern LastTwoClicked LastClicks;

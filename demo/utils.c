@@ -5,13 +5,39 @@ void InitImagesSounds() {
     backGroundTexture[1] = LoadTextureFromImage(backGround[1]);
     UnloadImage(backGround[1]);
 
-    backGround[0] = LoadImage("../assets/bg-first.png"); //arkaplan ekleme 
+    backGround[0] = LoadImage("../assets/background2.png"); //arkaplan ekleme 
     backGroundTexture[0] = LoadTextureFromImage(backGround[0]);
     UnloadImage(backGround[0]);
+    //
+    symbols[0] = LoadImage("../assets/2x.png"); //arkaplan ekleme 
+    symbolsTexture[0] = LoadTextureFromImage(symbols[0]);
+    UnloadImage(symbols[0]);
+
+    symbols[1] = LoadImage("../assets/3x.png"); //arkaplan ekleme 
+    symbolsTexture[1] = LoadTextureFromImage(symbols[1]);
+    UnloadImage(symbols[1]);
+
+    symbols[2] = LoadImage("../assets/heart.png"); //arkaplan ekleme 
+    symbolsTexture[2] = LoadTextureFromImage(symbols[2]);
+    UnloadImage(symbols[2]);
+
+    symbols[3] = LoadImage("../assets/hourglass.png"); //arkaplan ekleme 
+    symbolsTexture[3] = LoadTextureFromImage(symbols[3]);
+    UnloadImage(symbols[3]);
+    
+    symbols[4] = LoadImage("../assets/removable.png"); //arkaplan ekleme 
+    symbolsTexture[4] = LoadTextureFromImage(symbols[4]);
+    UnloadImage(symbols[4]);
+
+    symbols[5] = LoadImage("../assets/trophy.png"); //arkaplan ekleme 
+    symbolsTexture[5] = LoadTextureFromImage(symbols[5]);
+    UnloadImage(symbols[5]);
 
     gameSound = LoadSound("../assets/relaxing.mp3");
-    buttonSound = LoadSound("../assets/buttonSound.wav");
+    buttonSound = LoadSound("../assets/PixbuttonSound.wav");
     selectSound = LoadSound("../assets/selectSound.mp3");
+    mapSelectionSound = LoadSound("../assets/mapSelectionSound.mp3");
+    gameButtonSound = LoadSound("../assets/gameButtonSound.mp3");
     
     //UnloadSound(gameSound);     // Unload sound data
     for (int i = 0; i < NUM_IMAGES; i++) {
@@ -24,8 +50,8 @@ void InitImagesSounds() {
     }
 }
 void readFile(GameState* gameState) {
-    if (GuiButton((Rectangle) { screenWidth / 2 + 250, screenHeight / 2 - 150, 100, 30 }, "EASY")) {
-        PlaySound(buttonSound);
+    if (GuiButton((Rectangle) { screenWidth / 2 - 45, screenHeight / 2 - 100, 100, 30 }, "EASY")) {
+        PlaySound(mapSelectionSound);
         file = fopen("../assets/map2.txt", "r"); //dosyayi oku 
         if (file == NULL) { //dosyayi okumazsan konsola error ver
             perror("Failed to open file");
@@ -33,18 +59,18 @@ void readFile(GameState* gameState) {
         }
         gameState->isGameActive = true;
     }
-    else if (GuiButton((Rectangle) { screenWidth / 2 + 250, screenHeight / 2 - 50, 100, 30 }, "NORMAL")) {
-        PlaySound(buttonSound);
-        file = fopen("../assets/map1.txt", "r"); //dosyayi oku 
+    else if (GuiButton((Rectangle) { screenWidth / 2 - 45, screenHeight / 2 - 50, 100, 30 }, "NORMAL")) {
+        PlaySound(mapSelectionSound);
+        file = fopen("../assets/map3.txt", "r"); //dosyayi oku 
         if (file == NULL) { //dosyayi okumazsan konsola error ver
             perror("Failed to open file");
             return;
         }
         gameState->isGameActive = true;
     }
-    else if (GuiButton((Rectangle) { screenWidth / 2 + 250, screenHeight / 2 + 50, 100, 30 }, "EXPERT")) {
-        PlaySound(buttonSound);
-        file = fopen("../assets/map3.txt", "r"); //dosyayi oku 
+    else if (GuiButton((Rectangle) { screenWidth / 2 - 45, screenHeight / 2, 100, 30 }, "EXPERT")) {
+        PlaySound(mapSelectionSound);
+        file = fopen("../assets/map2.txt", "r"); //dosyayi oku 
         if (file == NULL) { //dosyayi okumazsan konsola error ver
             perror("Failed to open file");
             return;
@@ -173,15 +199,17 @@ bool isClickable(tile* getTopMostTile) {
 }
 
 bool isRemovable(LastTwoClicked LastClicks) {//son tiklanilan 2 tasi parametre olarak alir
-    if (LastClicks.lastClicked == NULL || LastClicks.previousClicked == NULL) {//son tiklanilan 2 tastan bir tanesi NULL ise false doner, program crash olmamasi icin 
+    tile* tile1 = LastClicks.lastClicked;
+    tile* tile2 = LastClicks.previousClicked;
+    
+    if (tile1 == NULL || tile2 == NULL) {//son tiklanilan 2 tastan bir tanesi NULL ise false doner, program crash olmamasi icin 
         return false;
     }
-    if (LastClicks.lastClicked->id != LastClicks.previousClicked->id) {//eger taslarin simgeleri ayni degilse bunlar masadan kaldirilamaz
+    if (tile1->id != tile2->id) {//eger taslarin simgeleri ayni degilse bunlar masadan kaldirilamaz
         return false;
     }
-    if ((LastClicks.lastClicked->x == LastClicks.previousClicked->x)//eger ayni tasa 2 kere cift tiklarsan masadan kalkmamasi icin 
-        && (LastClicks.lastClicked->y == LastClicks.previousClicked->y)
-        && (LastClicks.lastClicked->z == LastClicks.previousClicked->z)) {
+    //eger ayni tasa 2 kere cift tiklarsan masadan kalkmamasi icin 
+    if ((tile1->x == tile2->x) && (tile1->y == tile2->y) && (tile1->z == tile2->z)) {
         return false;
     }
     return true;
@@ -287,6 +315,7 @@ void resetLastClicks(LastTwoClicked* LastClicks) {
 void unloadGameSounds() {
     UnloadSound(gameSound);
     UnloadSound(buttonSound);
+    UnloadSound(selectSound);
 }
 
 void addPoints(LastTwoClicked LastClicks, GameState* gameState) {
@@ -294,12 +323,12 @@ void addPoints(LastTwoClicked LastClicks, GameState* gameState) {
     float elapsedTime = gameState->currentTime - gameState->lastMatchTime;
     int point = LastClicks.lastClicked->point;
 
-    if (elapsedTime <= 10.0) {
+    if (elapsedTime <= 6.0) {
         if (combo < 3) {
             combo++;
         }
     }
-    else if (elapsedTime > 10.0) {
+    else if (elapsedTime > 6.0) {
         combo = 1;
     }
 

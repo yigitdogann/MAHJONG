@@ -21,7 +21,7 @@ int main(void) {
     SetSoundVolume(gameSound, 0.2);
     SetTargetFPS(60);
     InitImagesSounds();
-    PlaySound(gameSound);
+    //PlaySound(gameSound);
 
     while (!WindowShouldClose()){
         drawGame();
@@ -43,17 +43,26 @@ void drawGame() {
             InitMap();
             InitObjects(&LastClicks);
             gameState.startTime = GetTime();
+            gameState.remainingTile = ARRAY_SIZE;
             gameScreen = game;
         }
     case game:
         if (gameState.isGameActive == true) {
+            
             gameState.matchable = countMatchableTiles(&gameState);
             gameState.currentTime = GetTime() - gameState.startTime;
             DrawTexture(backGroundTexture[1], 0, 0, WHITE);
-            DrawText(TextFormat("Points: %d", (&gameState)->totalPoint), 1100, 700, 40, RED);
-            DrawText(TextFormat("Matchable: %d", (&gameState)->matchable), 1100, 500, 40, RED);
-            DrawText(TextFormat("Time: %.2lf", gameState.currentTime), 1100, 800, 40, RED);
-            DrawText(TextFormat("MTime: %.2lf", gameState.lastMatchTime), 1100, 600, 40, RED);
+            DrawTexture(symbolsTexture[5], screenWidth / 2 + 500, 120, WHITE);
+            DrawTexture(symbolsTexture[4], screenWidth / 2 + 500, 220, WHITE);
+            DrawTexture(symbolsTexture[3], screenWidth / 2 + 495, 20, WHITE);
+            DrawTexture(symbolsTexture[2], screenWidth / 2 + 495, 320, WHITE);
+
+            DrawText(TextFormat("%d", (&gameState)->totalPoint), screenWidth / 2 + 570, 135, 40, RAYWHITE);
+            DrawText(TextFormat("x %d", (&gameState)->matchable), screenWidth / 2 + 500 + 70, 240, 40, RAYWHITE);
+            DrawText(TextFormat("%.0lfs", gameState.currentTime), screenWidth / 2 + 495 + 70, 40, 40, RAYWHITE);
+            DrawText(TextFormat("x %d", gameState.remainingTile), screenWidth / 2 + 565, 340, 40, RAYWHITE);
+            //DrawText(TextFormat("Remaining Tile: %.2lf", gameState.lastMatchTime), 1100, 500, 40, RED);
+            
             for (int k = 1, a = 0; k < LAYER; k++) {
                 for (int i = 0; i < ARRAY_Y; i++) {
                     for (int j = 0; j < ARRAY_X; j++) {
@@ -67,16 +76,18 @@ void drawGame() {
         }
     default: break;
     }
-    framesCounter++;
+
+    framesCounter++; // kullanilmadi
     EndDrawing();
 }
+
 void updateGame(GameState* gameState) {
     mousePosition = GetMousePosition();
 
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         processClick(&hint, &LastClicks, mousePosition, &head);
     }
-    if (GuiButton((Rectangle) { screenWidth / 2 + 500, screenHeight / 2 - 350, 100, 30 }, "SHUFFLE")) {
+    if (GuiButton((Rectangle) { screenWidth / 2 + 500, screenHeight / 2 + 25, 100, 30 }, "SHUFFLE")) {
         deletePointsforShuffle(gameState);
         resetHint(&hint);
         resetLastClicks(&LastClicks);
@@ -84,25 +95,25 @@ void updateGame(GameState* gameState) {
         shuffle_all(&hint, isExist, original);
         countMatchableTiles(gameState);
     }
-    if (GuiButton((Rectangle) { screenWidth / 2 + 500, screenHeight / 2 - 250, 100, 30 }, "HINT")) {
+    if (GuiButton((Rectangle) { screenWidth / 2 + 500, screenHeight / 2 + 100, 100, 30 }, "HINT")) {
         deletePointsforHint(gameState);
-        PlaySound(buttonSound);
+        PlaySound(gameButtonSound);
         resetHint(&hint);
         resetLastClicks(&LastClicks);
         countMatchableTiles(gameState);
         giveHint(&hint, &LastClicks, clickable_freq);
     }
-    if (GuiButton((Rectangle) { screenWidth / 2 + 500, screenHeight / 2 - 150, 100, 30 }, "UNDO")) {
-        PlaySound(buttonSound);
+    if (GuiButton((Rectangle) { screenWidth / 2 + 500, screenHeight / 2 + 175, 100, 30 }, "UNDO")) {
+        PlaySound(gameButtonSound);
         deleteBegin(&head, isExist, &LastClicks);
         countMatchableTiles(gameState);
         resetLastClicks(&LastClicks);
     }
-    if (GuiButton((Rectangle) { screenWidth / 2 + 500, screenHeight / 2 - 50, 100, 30 }, "MAIN")) {
+    if (GuiButton((Rectangle) { screenWidth / 2 + 500, screenHeight / 2 + 250, 100, 30 }, "MAIN")) {
         PlaySound(buttonSound);
         gameScreen = starting;
         gameState->isGameActive = false;
-        gameState->runbefore = true;
+        //gameState->runbefore = true;
     }
 }
 
@@ -125,10 +136,7 @@ void processClick(LastTwoClicked* hint, LastTwoClicked* LastClicks, Vector2 mous
     resetHint(hint);
 
     pointer = getTopMostTile(tiles, mousePosition);// imlec ile tiklanilan tasi point eder
-    if (pointer != NULL) {
-        printf("%d ", pointer->point);
-    }
-    //printf("%lf ", gameState.lastTime);
+    
     //tiklanilabilir bir tas ise && son tiklanilan tasa bir kez daha tiklanmiyorsa LastClicked guncellenir
     if (isClickable(pointer) && LastClicks->lastClicked != pointer) {
         PlaySound(selectSound); //secilebilir bir tasa tikladigi icin selectSound sesi verildi
@@ -136,13 +144,12 @@ void processClick(LastTwoClicked* hint, LastTwoClicked* LastClicks, Vector2 mous
 
         if (LastClicks->previousClicked != NULL) {//crash olmamasi icin eklendi, bos olan bir adresin degerini degistirmeye calisacakti, boylece program cokecekti 
             LastClicks->previousClicked->color = RAYWHITE;//eski onceki tiklanilani beyaz yapar (son 2yi kirmizi yapiyoruz o artik 3.)
+        }        
+        if (LastClicks->lastClicked != NULL) {
+            LastClicks->lastClicked->color = RAYWHITE;//yeni onceki tiklanilani eski son tiklanilan yapar
         }
 
         LastClicks->previousClicked = LastClicks->lastClicked;//yeni onceki tiklanilani eski son tiklanilan yapar
-        if (LastClicks->previousClicked != NULL) {
-            LastClicks->previousClicked->color = RAYWHITE;//yeni onceki tiklanilani eski son tiklanilan yapar
-        }
-
         LastClicks->lastClicked = pointer;//son tiklanilani alir
         if (LastClicks->lastClicked != NULL) {
             LastClicks->lastClicked->color = RED;//son tiklanilani kirmizi yapar
@@ -157,12 +164,15 @@ void processClick(LastTwoClicked* hint, LastTwoClicked* LastClicks, Vector2 mous
     }
     return;
 }
+
 void addBegin(node** head, LastTwoClicked* LastClicks, int* isExist) {
     node* newNode = (node*)malloc(sizeof(node)); // memoryden node kadar yer ayir ve bu yeri pointerla erisilebilir yap
     if (newNode == NULL) {//memory ayrilamadiysa konsola allocation erroru yazdir.
         printf("Memory allocation error in add_node_begin()\n");
         return;
     }
+
+    gameState.remainingTile -= 2;
 
     LastClicks->lastClicked->isExists = false; // son tiklanilan taslarin cizilemez ve tiklanilamaz olmasi icin 
     LastClicks->previousClicked->isExists = false;
@@ -179,6 +189,7 @@ void addBegin(node** head, LastTwoClicked* LastClicks, int* isExist) {
     
     return;
 }
+
 int giveHint(LastTwoClicked* hint, LastTwoClicked* LastClicks, int* clickable_freq) {
     int hintedId = -1;
     for (int i = 0; i < NUM_IMAGES; i++) {
@@ -215,6 +226,7 @@ int giveHint(LastTwoClicked* hint, LastTwoClicked* LastClicks, int* clickable_fr
     }
     return 2;
 }
+
 void deleteBegin(node** head, int* isExist, LastTwoClicked* LastClicks) {
     if (*head == NULL) {//linked listten kaldirilacak oge yok, linked list zaten bos
         // printf("Linked list is already empty\n");
@@ -230,6 +242,8 @@ void deleteBegin(node** head, int* isExist, LastTwoClicked* LastClicks) {
 
     (tempNode)->data1->color = RAYWHITE;//linked listten silerken renklerini normal haline getir
     (tempNode)->data2->color = RAYWHITE;
+
+    gameState.remainingTile += 2;
 
     *head = (*head)->nextNode;//basa eklemeli linked list oldugu icin listen artik bir sonraki next node ile temsil ediliyor, ilk elemani cikartacagiz
     //add begin - delete begin 

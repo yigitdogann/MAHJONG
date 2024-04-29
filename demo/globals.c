@@ -6,9 +6,14 @@ Texture2D textures[NUM_IMAGES]; // Array to hold textures
 Image backGround[2];    // background
 Texture2D backGroundTexture[2];
 
+Image symbols[6];
+Texture2D symbolsTexture[6];
+
 Sound gameSound;
 Sound buttonSound;
 Sound selectSound;
+Sound mapSelectionSound;
+Sound gameButtonSound;
 
 screen gameScreen = starting;
 LastTwoClicked LastClicks;
