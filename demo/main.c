@@ -12,19 +12,18 @@ void addBegin(node**, LastTwoClicked*, int*);
 void deleteBegin(node**, int*, LastTwoClicked*);
 int giveHint(LastTwoClicked*, LastTwoClicked*, int*);
 tile* getTopMostTile(tile tiles[ARRAY_Y][ARRAY_X][LAYER], Vector2 mousePosition);
-void drawGame();
+void updateAndDraw();
 void updateGame(GameState*);
 
 int main(void) {
     InitWindow(screenWidth, screenHeight, "Mahjong Game");//pencere genislik X yukseklik, pencere adi 
     InitAudioDevice();
-    SetSoundVolume(gameSound, 0.2);
     SetTargetFPS(60);
     InitImagesSounds();
     //PlaySound(gameSound);
-
+    
     while (!WindowShouldClose()){
-        drawGame();
+        updateAndDraw();
     }
     unloadGameSounds();
     CloseAudioDevice();     // Close audio device
@@ -33,57 +32,55 @@ int main(void) {
     return 0;
 }
 
-void drawGame() {
+void updateAndDraw() {
     BeginDrawing();
-    switch (gameScreen) {
+    switch (gameState.gameScreen) {
     case starting:
-        DrawTexture(backGroundTexture[0], 0, 0, WHITE);
-        readFile(&gameState);
-        if (gameState.isGameActive == true) {
+        if (!gameState.isMapSelected) {
+            DrawTexture(backGroundTexture[0], 0, 0, WHITE);
+            readFile(&gameState); // Consider moving or optimizing this call
+        }
+        if (gameState.isMapSelected) {
             InitMap();
             InitObjects(&LastClicks);
-            gameState.startTime = GetTime();
             gameState.remainingTile = ARRAY_SIZE;
-            gameScreen = game;
+            gameState.startTime = GetTime();
+            gameState.gameScreen = game;
+            // Now draw the initial game state
+            DrawTexture(backGroundTexture[1], 0, 0, WHITE); // Assuming texture 1 is for the game
         }
+        break;
     case game:
-        if (gameState.isGameActive == true) {
-            
-            gameState.matchable = countMatchableTiles(&gameState);
-            gameState.currentTime = GetTime() - gameState.startTime;
-            DrawTexture(backGroundTexture[1], 0, 0, WHITE);
-            DrawTexture(symbolsTexture[5], screenWidth / 2 + 500, 120, WHITE);
-            DrawTexture(symbolsTexture[4], screenWidth / 2 + 500, 220, WHITE);
-            DrawTexture(symbolsTexture[3], screenWidth / 2 + 495, 20, WHITE);
-            DrawTexture(symbolsTexture[2], screenWidth / 2 + 495, 320, WHITE);
-
-            DrawText(TextFormat("%d", (&gameState)->totalPoint), screenWidth / 2 + 570, 135, 40, RAYWHITE);
-            DrawText(TextFormat("x %d", (&gameState)->matchable), screenWidth / 2 + 500 + 70, 240, 40, RAYWHITE);
-            DrawText(TextFormat("%.0lfs", gameState.currentTime), screenWidth / 2 + 495 + 70, 40, 40, RAYWHITE);
-            DrawText(TextFormat("x %d", gameState.remainingTile), screenWidth / 2 + 565, 340, 40, RAYWHITE);
-            //DrawText(TextFormat("Remaining Tile: %.2lf", gameState.lastMatchTime), 1100, 500, 40, RED);
-            
-            for (int k = 1, a = 0; k < LAYER; k++) {
-                for (int i = 0; i < ARRAY_Y; i++) {
-                    for (int j = 0; j < ARRAY_X; j++) {
-                        if (tiles[i][j][k].isExists == true) {
-                            DrawTexture(tiles[i][j][k].texture, tiles[i][j][k].rectangle.x, tiles[i][j][k].rectangle.y, tiles[i][j][k].color);
-                        }
-                    }
-                }
-            }
-            updateGame(&gameState); //oyundaki degerleri update et
+        drawGame();
+        updateGame(&gameState);
+        break;
+    case gameOver:
+        DrawTexture(backGroundTexture[2], 0, 0, WHITE);
+        if (GuiButton((Rectangle) { 670, 610, 100, 30 }, "MAIN")) {
+            //high score yapılabilir
+            PlaySound(buttonSound);
+            gameState.gameScreen = starting;
+            gameState.isMapSelected = false;
         }
-    default: break;
+        break;
+    case victory:
+        DrawTexture(backGroundTexture[3], 0, 0, WHITE);
+        if (GuiButton((Rectangle) { 670, 610, 100, 30 }, "MAIN")) {
+            //high score yapılabilir
+            PlaySound(buttonSound);
+            gameState.gameScreen = starting;
+            gameState.isMapSelected = false;
+        }
+        break;
     }
 
-    framesCounter++; // kullanilmadi
+    framesCounter++;
     EndDrawing();
 }
 
 void updateGame(GameState* gameState) {
     mousePosition = GetMousePosition();
-
+    minutesAndSeconds(gameState); //zamanı dakika saniye cinsinden 3 dakikadan itibaren geriye saymamızı sağlar
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         processClick(&hint, &LastClicks, mousePosition, &head);
     }
@@ -111,10 +108,12 @@ void updateGame(GameState* gameState) {
     }
     if (GuiButton((Rectangle) { screenWidth / 2 + 500, screenHeight / 2 + 250, 100, 30 }, "MAIN")) {
         PlaySound(buttonSound);
-        gameScreen = starting;
-        gameState->isGameActive = false;
-        //gameState->runbefore = true;
+        gameState->gameScreen = starting;
+        gameState->isMapSelected = false;
     }
+    (*gameState).gameTime = GetTime() - (*gameState).startTime;
+    gameState->matchable = countMatchableTiles(&gameState);
+    isGameOver(gameState);
 }
 
 tile* getTopMostTile(tile tiles[ARRAY_Y][ARRAY_X][LAYER], Vector2 mousePosition) {
@@ -140,7 +139,7 @@ void processClick(LastTwoClicked* hint, LastTwoClicked* LastClicks, Vector2 mous
     //tiklanilabilir bir tas ise && son tiklanilan tasa bir kez daha tiklanmiyorsa LastClicked guncellenir
     if (isClickable(pointer) && LastClicks->lastClicked != pointer) {
         PlaySound(selectSound); //secilebilir bir tasa tikladigi icin selectSound sesi verildi
-        (&gameState)->lastMatchTime = (&gameState)->currentTime; //en son 2tas bu surede silindi (komboda kullanilacak) 
+        (&gameState)->lastMatchTime = (&gameState)->gameTime; //en son 2tas bu surede silindi (komboda kullanilacak) 
 
         if (LastClicks->previousClicked != NULL) {//crash olmamasi icin eklendi, bos olan bir adresin degerini degistirmeye calisacakti, boylece program cokecekti 
             LastClicks->previousClicked->color = RAYWHITE;//eski onceki tiklanilani beyaz yapar (son 2yi kirmizi yapiyoruz o artik 3.)

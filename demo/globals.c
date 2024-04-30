@@ -3,8 +3,8 @@
 Image images[NUM_IMAGES];    // Array to hold image data
 Texture2D textures[NUM_IMAGES]; // Array to hold textures
 
-Image backGround[2];    // background
-Texture2D backGroundTexture[2];
+Image backGround[4];    // background
+Texture2D backGroundTexture[4];
 
 Image symbols[6];
 Texture2D symbolsTexture[6];
@@ -15,7 +15,6 @@ Sound selectSound;
 Sound mapSelectionSound;
 Sound gameButtonSound;
 
-screen gameScreen = starting;
 LastTwoClicked LastClicks;
 LastTwoClicked hint;
 
@@ -30,7 +29,7 @@ int clickable_freq[ARRAY_SIZE];
 tile tiles[ARRAY_Y][ARRAY_X][LAYER];
 int values[ARRAY_Y][ARRAY_X];
 Vector2 mousePosition;
-GameState gameState = { 0 };
+GameState gameState = {0};
 
 const int screenWidth = 1440;
 const int screenHeight = 900;

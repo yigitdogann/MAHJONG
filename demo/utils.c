@@ -8,6 +8,15 @@ void InitImagesSounds() {
     backGround[0] = LoadImage("../assets/background2.png"); //arkaplan ekleme 
     backGroundTexture[0] = LoadTextureFromImage(backGround[0]);
     UnloadImage(backGround[0]);
+    
+    backGround[2] = LoadImage("../assets/gameOver.png"); //arkaplan ekleme 
+    backGroundTexture[2] = LoadTextureFromImage(backGround[2]);
+    UnloadImage(backGround[2]);
+
+    backGround[3] = LoadImage("../assets/victory.png"); //arkaplan ekleme 
+    backGroundTexture[3] = LoadTextureFromImage(backGround[3]);
+    UnloadImage(backGround[3]);
+
     //
     symbols[0] = LoadImage("../assets/2x.png"); //arkaplan ekleme 
     symbolsTexture[0] = LoadTextureFromImage(symbols[0]);
@@ -33,7 +42,7 @@ void InitImagesSounds() {
     symbolsTexture[5] = LoadTextureFromImage(symbols[5]);
     UnloadImage(symbols[5]);
 
-    gameSound = LoadSound("../assets/relaxing.mp3");
+    //gameSound = LoadSound("../assets/relaxing.mp3");
     buttonSound = LoadSound("../assets/PixbuttonSound.wav");
     selectSound = LoadSound("../assets/selectSound.mp3");
     mapSelectionSound = LoadSound("../assets/mapSelectionSound.mp3");
@@ -57,7 +66,7 @@ void readFile(GameState* gameState) {
             perror("Failed to open file");
             return;
         }
-        gameState->isGameActive = true;
+        gameState->isMapSelected = true;
     }
     else if (GuiButton((Rectangle) { screenWidth / 2 - 45, screenHeight / 2 - 50, 100, 30 }, "NORMAL")) {
         PlaySound(mapSelectionSound);
@@ -66,7 +75,7 @@ void readFile(GameState* gameState) {
             perror("Failed to open file");
             return;
         }
-        gameState->isGameActive = true;
+        gameState->isMapSelected = true;
     }
     else if (GuiButton((Rectangle) { screenWidth / 2 - 45, screenHeight / 2, 100, 30 }, "EXPERT")) {
         PlaySound(mapSelectionSound);
@@ -75,7 +84,7 @@ void readFile(GameState* gameState) {
             perror("Failed to open file");
             return;
         }
-        gameState->isGameActive = true;
+        gameState->isMapSelected = true;
     }
 }
 void InitMap() {
@@ -320,7 +329,7 @@ void unloadGameSounds() {
 
 void addPoints(LastTwoClicked LastClicks, GameState* gameState) {
     int combo = gameState->combo;
-    float elapsedTime = gameState->currentTime - gameState->lastMatchTime;
+    float elapsedTime = gameState->gameTime - gameState->lastMatchTime;
     int point = LastClicks.lastClicked->point;
 
     if (elapsedTime <= 6.0) {
@@ -333,7 +342,7 @@ void addPoints(LastTwoClicked LastClicks, GameState* gameState) {
     }
 
     gameState->totalPoint += 2 * combo * point;
-    gameState->lastMatchTime = gameState->currentTime;
+    gameState->lastMatchTime = gameState->gameTime;
     gameState->combo = combo;
 
     return;
@@ -342,6 +351,7 @@ void addPoints(LastTwoClicked LastClicks, GameState* gameState) {
 void deletePointsforHint(GameState* gameState) {
     gameState->totalPoint -= 20;
 }
+
 void deletePointsforShuffle(GameState* gameState) {
     gameState->totalPoint -= 50;
 }
@@ -373,4 +383,59 @@ int countMatchableTiles(GameState* gameState) {
     gameState->matchable = count;
     
     return count;
+}
+
+void minutesAndSeconds(GameState* gameState) {
+    const int countdown_minute = 5;
+
+    int minutes = countdown_minute - (int)gameState->gameTime / 60 - 1;
+    int seconds = 60 - (int)gameState->gameTime % 60;
+    if (seconds == 60) {
+        seconds = 0;
+        minutes++;
+    }
+
+    gameState->minutes = minutes;
+    gameState->seconds = seconds;
+}
+
+void isGameOver(GameState* gameState) {
+    /*printf("Checking game over conditions: Frames: %d, Start Time: %.2f, Current Time: %.2f\n",
+        framesCounter, gameState->startTime, GetTime());*/
+
+    if (gameState->remainingTile == 0) {
+        gameState->isMapSelected = false;
+        gameState->gameScreen = victory;
+        //printf("Game Over: Victory\n");
+    }
+    else if ((double)framesCounter / 60 - gameState->startTime > 300.0) {
+        gameState->isMapSelected = false;
+        gameState->gameScreen = gameOver;
+        //printf("Game Over: Time Limit Exceeded\n");
+    }
+}
+
+void drawGame() {
+    DrawTexture(backGroundTexture[1], 0, 0, WHITE);
+
+    DrawTexture(symbolsTexture[5], screenWidth / 2 + 500, 120, WHITE);
+    DrawTexture(symbolsTexture[4], screenWidth / 2 + 500, 220, WHITE);
+    DrawTexture(symbolsTexture[3], screenWidth / 2 + 495, 20, WHITE);
+    DrawTexture(symbolsTexture[2], screenWidth / 2 + 495, 320, WHITE);
+
+    DrawText(TextFormat("%d", (&gameState)->totalPoint), screenWidth / 2 + 570, 135, 40, RAYWHITE);
+    DrawText(TextFormat("x %d", (&gameState)->matchable), screenWidth / 2 + 500 + 70, 240, 40, RAYWHITE);
+    DrawText(TextFormat("%d:%.2d", gameState.minutes, gameState.seconds), screenWidth / 2 + 495 + 70, 40, 40, RAYWHITE);
+    DrawText(TextFormat("x %d", gameState.remainingTile), screenWidth / 2 + 565, 340, 40, RAYWHITE);
+    //DrawText(TextFormat("Remaining Tile: %.2lf", gameState.lastMatchTime), 1100, 500, 40, RED);
+
+    for (int k = 1, a = 0; k < LAYER; k++) {
+        for (int i = 0; i < ARRAY_Y; i++) {
+            for (int j = 0; j < ARRAY_X; j++) {
+                if (tiles[i][j][k].isExists == true) {
+                    DrawTexture(tiles[i][j][k].texture, tiles[i][j][k].rectangle.x, tiles[i][j][k].rectangle.y, tiles[i][j][k].color);
+                }
+            }
+        }
+    }
 }

@@ -32,9 +32,12 @@ typedef struct LastTwoClicked {
     tile* lastClicked;
 }LastTwoClicked;
 
+typedef enum screen { starting, game, gameOver, victory} screen;
+
 typedef struct GameState {
     // Define game state variables
     bool isGameActive;
+    bool isMapSelected;
     //bool runbefore;
 
     int remainingTile;
@@ -42,8 +45,13 @@ typedef struct GameState {
     int combo;
     int matchable;
 
+    int minutes;
+    int seconds;
+
+    screen gameScreen;
+
     double startTime;
-    double currentTime;
+    double gameTime;
     double lastMatchTime;
 
     // Additional game states like current level, score, etc.
@@ -55,13 +63,11 @@ typedef struct node {
     struct node* nextNode;
 }node;
 
-typedef enum screen { starting, game } screen;
-
 extern Image images[NUM_IMAGES];    // Array to hold image data
 extern Texture2D textures[NUM_IMAGES]; // Array to hold textures
 
-extern Image backGround[2];    // background
-extern Texture2D backGroundTexture[2];
+extern Image backGround[4];    // background
+extern Texture2D backGroundTexture[4];
 
 extern Image symbols[6]; 
 extern Texture2D symbolsTexture[6];
@@ -72,7 +78,7 @@ extern Sound selectSound;
 extern Sound mapSelectionSound;
 extern Sound gameButtonSound;
 
-extern screen gameScreen;
+//extern screen gameScreen;
 extern LastTwoClicked LastClicks;
 extern LastTwoClicked hint;
 

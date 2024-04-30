@@ -34,5 +34,9 @@ void deletePointsforShuffle(GameState*);
 
 int countMatchableTiles(GameState*);
 
+void minutesAndSeconds(GameState*);
 
+void isGameOver(GameState*);
+
+void drawGame();
 #endif
