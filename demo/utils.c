@@ -79,7 +79,7 @@ void readFile(GameState* gameState) {
     }
     else if (GuiButton((Rectangle) { screenWidth / 2 - 45, screenHeight / 2, 100, 30 }, "EXPERT")) {
         PlaySound(mapSelectionSound);
-        file = fopen("../assets/map2.txt", "r"); //dosyayi oku 
+        file = fopen("../assets/map1.txt", "r"); //dosyayi oku 
         if (file == NULL) { //dosyayi okumazsan konsola error ver
             perror("Failed to open file");
             return;
@@ -99,7 +99,7 @@ void InitMap() {
         }
     }
     fclose(file);  // Always close the file after you're done reading
-    free(file);
+     //free(file);
     for (int k = LAYER - 1; k > 0; k--) { //mapi okumak icin once en ust kati oku
         for (int i = 0; i < HEIGHT - 1; i++) { //arrayin dikey degerlerini oku
             for (int j = 0; j < WIDTH - 1; j++) { //arrayin yatay degerlerini oku 
@@ -221,7 +221,12 @@ bool isRemovable(LastTwoClicked LastClicks) {//son tiklanilan 2 tasi parametre o
     if ((tile1->x == tile2->x) && (tile1->y == tile2->y) && (tile1->z == tile2->z)) {
         return false;
     }
+
+    tile1 = NULL;
+    tile2 = NULL;
+
     return true;
+    
 }
 
 void shuffleBasedOnCondition(int* a, int* b, int size, int x) {
@@ -308,15 +313,10 @@ void randomFiller(int* original) {
 void resetLastClicks(LastTwoClicked* LastClicks) {
     if (LastClicks->lastClicked != NULL) {
         LastClicks->lastClicked->color = RAYWHITE;
-    }
-    if (LastClicks->previousClicked != NULL) {
-        LastClicks->previousClicked->color = RAYWHITE;
-    }
-
-    if (LastClicks->lastClicked != NULL) {
         LastClicks->lastClicked = NULL;
     }
     if (LastClicks->previousClicked != NULL) {
+        LastClicks->previousClicked->color = RAYWHITE;
         LastClicks->previousClicked = NULL;
     }
 }
@@ -438,4 +438,45 @@ void drawGame() {
             }
         }
     }
+}
+
+void resetGame() {
+    /*for (size_t i = 0; i < LAYER; i++){
+        for (size_t j = 0; j < ARRAY_Y; j++){
+            for (size_t k = 0; k < ARRAY_X; k++){
+                tiles[j][k][i].isExists = ;
+            }
+        }
+    }*/
+
+    for (int y = 0; y < ARRAY_Y; y++) {
+        for (int x = 0; x < ARRAY_X; x++) {
+            for (int l = 0; l < LAYER; l++) {
+                newMap[y][x][l] = 0;
+            }
+        }
+    }
+    
+    for (int y = 0; y < ARRAY_Y; y++) {
+        for (int x = 0; x < ARRAY_X; x++) {
+            map[y][x] = 0;
+        }
+    }
+
+    for (int i = 0; i < ARRAY_SIZE; i++) {
+        isExist[i] = 0;
+        clickable_freq[i] = 0;
+    }
+
+    randomFiller(original);
+
+    resetHint(&hint);
+    resetLastClicks(&LastClicks);
+    gameState.combo = 1;
+    gameState.gameTime = 0;
+    gameState.totalPoint = 0;
+    gameState.lastMatchTime = 0;
+    gameState.remainingTile = ARRAY_SIZE;
+
+    free(head);
 }

@@ -39,4 +39,7 @@ void minutesAndSeconds(GameState*);
 void isGameOver(GameState*);
 
 void drawGame();
+
+void resetGame();
+
 #endif

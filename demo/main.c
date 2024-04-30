@@ -61,15 +61,16 @@ void updateAndDraw() {
             PlaySound(buttonSound);
             gameState.gameScreen = starting;
             gameState.isMapSelected = false;
+            resetGame();
         }
         break;
     case victory:
         DrawTexture(backGroundTexture[3], 0, 0, WHITE);
         if (GuiButton((Rectangle) { 670, 610, 100, 30 }, "MAIN")) {
-            //high score yapılabilir
             PlaySound(buttonSound);
             gameState.gameScreen = starting;
             gameState.isMapSelected = false;
+            resetGame();
         }
         break;
     }
@@ -110,6 +111,7 @@ void updateGame(GameState* gameState) {
         PlaySound(buttonSound);
         gameState->gameScreen = starting;
         gameState->isMapSelected = false;
+        resetGame();
     }
     (*gameState).gameTime = GetTime() - (*gameState).startTime;
     gameState->matchable = countMatchableTiles(&gameState);
@@ -161,6 +163,7 @@ void processClick(LastTwoClicked* hint, LastTwoClicked* LastClicks, Vector2 mous
             countMatchableTiles(&gameState);
         }
     }
+    //free(pointer);
     return;
 }
 
