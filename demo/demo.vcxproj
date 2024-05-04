@@ -143,6 +143,67 @@
     <ClInclude Include="globals.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\assets\2x.png" />
+    <Image Include="..\assets\3x.png" />
+    <Image Include="..\assets\background2.png" />
+    <Image Include="..\assets\bg-black.png" />
+    <Image Include="..\assets\gameOver.png" />
+    <Image Include="..\assets\heart.png" />
+    <Image Include="..\assets\hourglass.png" />
+    <Image Include="..\assets\removable.png" />
+    <Image Include="..\assets\tiles\0.png" />
+    <Image Include="..\assets\tiles\1.png" />
+    <Image Include="..\assets\tiles\10.png" />
+    <Image Include="..\assets\tiles\11.png" />
+    <Image Include="..\assets\tiles\12.png" />
+    <Image Include="..\assets\tiles\13.png" />
+    <Image Include="..\assets\tiles\14.png" />
+    <Image Include="..\assets\tiles\15.png" />
+    <Image Include="..\assets\tiles\16.png" />
+    <Image Include="..\assets\tiles\17.png" />
+    <Image Include="..\assets\tiles\18.png" />
+    <Image Include="..\assets\tiles\19.png" />
+    <Image Include="..\assets\tiles\2.png" />
+    <Image Include="..\assets\tiles\20.png" />
+    <Image Include="..\assets\tiles\21.png" />
+    <Image Include="..\assets\tiles\22.png" />
+    <Image Include="..\assets\tiles\23.png" />
+    <Image Include="..\assets\tiles\24.png" />
+    <Image Include="..\assets\tiles\25.png" />
+    <Image Include="..\assets\tiles\26.png" />
+    <Image Include="..\assets\tiles\27.png" />
+    <Image Include="..\assets\tiles\28.png" />
+    <Image Include="..\assets\tiles\29.png" />
+    <Image Include="..\assets\tiles\3.png" />
+    <Image Include="..\assets\tiles\30.png" />
+    <Image Include="..\assets\tiles\31.png" />
+    <Image Include="..\assets\tiles\32.png" />
+    <Image Include="..\assets\tiles\33.png" />
+    <Image Include="..\assets\tiles\34.png" />
+    <Image Include="..\assets\tiles\35.png" />
+    <Image Include="..\assets\tiles\4.png" />
+    <Image Include="..\assets\tiles\5.png" />
+    <Image Include="..\assets\tiles\6.png" />
+    <Image Include="..\assets\tiles\7.png" />
+    <Image Include="..\assets\tiles\8.png" />
+    <Image Include="..\assets\tiles\9.png" />
+    <Image Include="..\assets\trophy.png" />
+    <Image Include="..\assets\victory.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="..\assets\gameButtonSound.mp3" />
+    <Media Include="..\assets\mapSelectionSound.mp3" />
+    <Media Include="..\assets\PixbuttonSound.wav" />
+    <Media Include="..\assets\relaxing.mp3" />
+    <Media Include="..\assets\selectSound.mp3" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\assets\highscores.txt" />
+    <Text Include="..\assets\map1.txt" />
+    <Text Include="..\assets\map2.txt" />
+    <Text Include="..\assets\map3.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -288,7 +288,7 @@ void shuffle_all(LastTwoClicked* hint, int* isExist, int* original) {
 }
 
 void resetHint(LastTwoClicked* hint) {
-    if (hint->lastClicked != NULL) {
+    if (hint->lastClicked != NULL) {    
         hint->lastClicked->color = RAYWHITE;
     }
     if (hint->previousClicked != NULL) {
@@ -441,14 +441,7 @@ void drawGame() {
 }
 
 void resetGame() {
-    /*for (size_t i = 0; i < LAYER; i++){
-        for (size_t j = 0; j < ARRAY_Y; j++){
-            for (size_t k = 0; k < ARRAY_X; k++){
-                tiles[j][k][i].isExists = ;
-            }
-        }
-    }*/
-
+ 
     for (int y = 0; y < ARRAY_Y; y++) {
         for (int x = 0; x < ARRAY_X; x++) {
             for (int l = 0; l < LAYER; l++) {
@@ -469,14 +462,89 @@ void resetGame() {
     }
 
     randomFiller(original);
-
     resetHint(&hint);
     resetLastClicks(&LastClicks);
-    gameState.combo = 1;
-    gameState.gameTime = 0;
-    gameState.totalPoint = 0;
-    gameState.lastMatchTime = 0;
-    gameState.remainingTile = ARRAY_SIZE;
-
+    (&gameState)->combo = 1;
+    (&gameState)->gameTime = 0;
+    (&gameState)->totalPoint = 0;
+    (&gameState)->lastMatchTime = 0;
+    (&gameState)->remainingTile = ARRAY_SIZE;
+    saveGuiVisible = true;
     free(head);
+}
+
+void savingText() {
+    // GUI to get text input and handle save trigger
+    if (GuiButton((Rectangle) { screenWidth / 2 - 50, 300, 100, 30 }, "Save Text") || IsKeyPressed(KEY_ENTER)) {
+        saveGuiVisible = false; // Hide the GUI elements after interaction
+
+        // Sort and save the new entry
+        sort_and_write_scores("../output.txt", text, gameState.totalPoint);
+
+        DrawText("Saved!", screenWidth / 2 - 50, 340, 20, GREEN); // Feedback to user
+    }
+
+    GuiTextBox((Rectangle) { screenWidth / 2 - 100, 200, 200, 30 }, text, 256, true);
+
+    if (!saveGuiVisible && fopen("../output.txt", "r") == NULL) {
+        DrawText("Failed to save!", screenWidth / 2 - 50, 340, 20, RED); // Error message if file opening fails
+    }
+}
+
+void sort_and_write_scores(const char* filename, const char* text, int points) {
+    
+    int count = 0;
+
+    // Read existing data
+    FILE* file1 = fopen("../output.txt", "r");
+    if (file != NULL) {
+        while (fscanf(file, "%[^0-9]%d\n", entries[count].text, &entries[count].points) == 2) {
+            if (++count >= MAX_LINES) break;
+        }
+        fclose(file1);
+    }
+
+    // Add new entry
+    strcpy(entries[count].text, text);
+    entries[count].points = points;
+    count++;
+
+    // Sort the array
+    qsort(entries, count, sizeof(ScoreEntry), compare_scores);
+
+    // Write sorted data back to file
+    file1 = fopen("../output.txt", "w");
+    if (file1 != NULL) {
+        for (int i = 0; i < count; i++) {
+            fprintf(file, "%s %d\n", entries[i].text, entries[i].points);
+        }
+        fclose(file1);
+    }
+}
+
+int compare_scores(const void* a, const void* b) {
+    ScoreEntry* entryA = (ScoreEntry*)a;
+    ScoreEntry* entryB = (ScoreEntry*)b;
+    return (entryB->points - entryA->points);  // Descending order
+}
+
+void print10() {
+    FILE* file3 = fopen("../output.txt", "r");
+    if (file3 == NULL) {
+        perror("Failed to open file");
+        return; // Exit if file opening fails
+    }
+
+    for (size_t i = 0; i < 10; i++) {
+        if (fscanf(file3, "%29s %d", array[i], &point[i]) != 2) {
+            printf("Error reading line %zu\n", i + 1);
+            break; // Exit loop if there is a mismatch or not enough data
+        }
+    }
+
+    fclose(file3); // Close the file after reading
+
+    for (int i = 0; i < 10; i++) {
+        DrawText(TextFormat("%s %d", array[i], point[i]), 10, 20 + i * 70, 50, GOLD); // Adjust position and size as needed
+    }
 }

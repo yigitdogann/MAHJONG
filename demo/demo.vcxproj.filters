@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Resource Files\assets">
+      <UniqueIdentifier>{ee74a2e8-b867-4235-b1d1-7f46cd1faf70}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\assets\tiles">
+      <UniqueIdentifier>{9b248640-469e-4924-8678-08a431781db8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.c">
@@ -32,5 +38,176 @@
     <ClInclude Include="utils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\assets\2x.png">
+      <Filter>Resource Files\assets</Filter>
+    </Image>
+    <Image Include="..\assets\3x.png">
+      <Filter>Resource Files\assets</Filter>
+    </Image>
+    <Image Include="..\assets\background2.png">
+      <Filter>Resource Files\assets</Filter>
+    </Image>
+    <Image Include="..\assets\bg-black.png">
+      <Filter>Resource Files\assets</Filter>
+    </Image>
+    <Image Include="..\assets\gameOver.png">
+      <Filter>Resource Files\assets</Filter>
+    </Image>
+    <Image Include="..\assets\heart.png">
+      <Filter>Resource Files\assets</Filter>
+    </Image>
+    <Image Include="..\assets\hourglass.png">
+      <Filter>Resource Files\assets</Filter>
+    </Image>
+    <Image Include="..\assets\removable.png">
+      <Filter>Resource Files\assets</Filter>
+    </Image>
+    <Image Include="..\assets\trophy.png">
+      <Filter>Resource Files\assets</Filter>
+    </Image>
+    <Image Include="..\assets\victory.png">
+      <Filter>Resource Files\assets</Filter>
+    </Image>
+    <Image Include="..\assets\tiles\0.png">
+      <Filter>Resource Files\assets\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\tiles\1.png">
+      <Filter>Resource Files\assets\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\tiles\2.png">
+      <Filter>Resource Files\assets\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\tiles\3.png">
+      <Filter>Resource Files\assets\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\tiles\4.png">
+      <Filter>Resource Files\assets\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\tiles\5.png">
+      <Filter>Resource Files\assets\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\tiles\6.png">
+      <Filter>Resource Files\assets\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\tiles\7.png">
+      <Filter>Resource Files\assets\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\tiles\8.png">
+      <Filter>Resource Files\assets\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\tiles\9.png">
+      <Filter>Resource Files\assets\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\tiles\10.png">
+      <Filter>Resource Files\assets\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\tiles\11.png">
+      <Filter>Resource Files\assets\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\tiles\12.png">
+      <Filter>Resource Files\assets\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\tiles\13.png">
+      <Filter>Resource Files\assets\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\tiles\14.png">
+      <Filter>Resource Files\assets\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\tiles\15.png">
+      <Filter>Resource Files\assets\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\tiles\16.png">
+      <Filter>Resource Files\assets\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\tiles\17.png">
+      <Filter>Resource Files\assets\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\tiles\18.png">
+      <Filter>Resource Files\assets\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\tiles\19.png">
+      <Filter>Resource Files\assets\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\tiles\20.png">
+      <Filter>Resource Files\assets\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\tiles\21.png">
+      <Filter>Resource Files\assets\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\tiles\22.png">
+      <Filter>Resource Files\assets\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\tiles\23.png">
+      <Filter>Resource Files\assets\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\tiles\24.png">
+      <Filter>Resource Files\assets\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\tiles\25.png">
+      <Filter>Resource Files\assets\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\tiles\26.png">
+      <Filter>Resource Files\assets\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\tiles\27.png">
+      <Filter>Resource Files\assets\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\tiles\28.png">
+      <Filter>Resource Files\assets\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\tiles\29.png">
+      <Filter>Resource Files\assets\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\tiles\30.png">
+      <Filter>Resource Files\assets\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\tiles\31.png">
+      <Filter>Resource Files\assets\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\tiles\32.png">
+      <Filter>Resource Files\assets\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\tiles\33.png">
+      <Filter>Resource Files\assets\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\tiles\34.png">
+      <Filter>Resource Files\assets\tiles</Filter>
+    </Image>
+    <Image Include="..\assets\tiles\35.png">
+      <Filter>Resource Files\assets\tiles</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="..\assets\gameButtonSound.mp3">
+      <Filter>Resource Files\assets</Filter>
+    </Media>
+    <Media Include="..\assets\mapSelectionSound.mp3">
+      <Filter>Resource Files\assets</Filter>
+    </Media>
+    <Media Include="..\assets\PixbuttonSound.wav">
+      <Filter>Resource Files\assets</Filter>
+    </Media>
+    <Media Include="..\assets\relaxing.mp3">
+      <Filter>Resource Files\assets</Filter>
+    </Media>
+    <Media Include="..\assets\selectSound.mp3">
+      <Filter>Resource Files\assets</Filter>
+    </Media>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\assets\highscores.txt">
+      <Filter>Resource Files\assets</Filter>
+    </Text>
+    <Text Include="..\assets\map1.txt">
+      <Filter>Resource Files\assets</Filter>
+    </Text>
+    <Text Include="..\assets\map2.txt">
+      <Filter>Resource Files\assets</Filter>
+    </Text>
+    <Text Include="..\assets\map3.txt">
+      <Filter>Resource Files\assets</Filter>
+    </Text>
   </ItemGroup>
 </Project>

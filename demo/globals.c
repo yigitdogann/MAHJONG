@@ -9,6 +9,15 @@ Texture2D backGroundTexture[4];
 Image symbols[6];
 Texture2D symbolsTexture[6];
 
+ScoreEntry entries[MAX_LINES];
+char lines[MAX_LINES][MAX_LINE_LENGTH];
+char text[256] = "\0";
+bool saveText = false; // Flag to check if we need to save text
+bool saveGuiVisible = true;
+int* num_lines_read = 10;
+char array[10][30]; // Array of strings, each can hold up to 29 characters plus null terminator
+int point[10];      // Array to store integers
+
 Sound gameSound;
 Sound buttonSound;
 Sound selectSound;

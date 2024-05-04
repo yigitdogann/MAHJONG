@@ -13,6 +13,8 @@
 #define LAYER 6
 #define NUM_IMAGES 36
 #define ARRAY_SIZE 144
+#define MAX_LINE_LENGTH 30
+#define MAX_LINES 1024 
 
 typedef struct tile {
     int point;//point of tile, tür
@@ -63,6 +65,11 @@ typedef struct node {
     struct node* nextNode;
 }node;
 
+typedef struct {
+    int points;
+    char text[30];
+} ScoreEntry;
+
 extern Image images[NUM_IMAGES];    // Array to hold image data
 extern Texture2D textures[NUM_IMAGES]; // Array to hold textures
 
@@ -81,6 +88,15 @@ extern Sound gameButtonSound;
 //extern screen gameScreen;
 extern LastTwoClicked LastClicks;
 extern LastTwoClicked hint;
+
+extern ScoreEntry entries[MAX_LINES];
+extern char lines[MAX_LINES][MAX_LINE_LENGTH];
+extern char text[256];
+extern bool saveGuiVisible;
+extern bool saveText;
+extern int* num_lines_read;
+extern char array[10][30]; // Array of strings, each can hold up to 29 characters plus null terminator
+extern int point[10];      // Array to store integers
 
 extern int map[ARRAY_Y][ARRAY_X];
 extern int newMap[ARRAY_Y][ARRAY_X][LAYER];

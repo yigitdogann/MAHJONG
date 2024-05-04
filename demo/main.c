@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <string.h>
 #define RAYGUI_IMPLEMENTATION
 #include <raygui.h>
 
@@ -15,8 +16,11 @@ tile* getTopMostTile(tile tiles[ARRAY_Y][ARRAY_X][LAYER], Vector2 mousePosition)
 void updateAndDraw();
 void updateGame(GameState*);
 
+Shader shader;
+
 int main(void) {
     InitWindow(screenWidth, screenHeight, "Mahjong Game");//pencere genislik X yukseklik, pencere adi 
+    Shader shader = LoadShader("../basic.vs", "../basic.fs");
     InitAudioDevice();
     SetTargetFPS(60);
     InitImagesSounds();
@@ -56,6 +60,9 @@ void updateAndDraw() {
         break;
     case gameOver:
         DrawTexture(backGroundTexture[2], 0, 0, WHITE);
+        if (gameState.totalPoint > point[10]) {
+            DrawText("NEW HIGH SCORE!!!", 500, 100, 100, GOLD);
+        }
         if (GuiButton((Rectangle) { 670, 610, 100, 30 }, "MAIN")) {
             //high score yapılabilir
             PlaySound(buttonSound);
@@ -63,6 +70,13 @@ void updateAndDraw() {
             gameState.isMapSelected = false;
             resetGame();
         }
+        if (saveGuiVisible == true) {
+            savingText();
+        }
+        if (saveGuiVisible == false) {
+            DrawText("Saved!", screenWidth / 2 - 50, 340, 20, GREEN); // Feedback to user
+        }
+        print10();
         break;
     case victory:
         DrawTexture(backGroundTexture[3], 0, 0, WHITE);
@@ -72,6 +86,14 @@ void updateAndDraw() {
             gameState.isMapSelected = false;
             resetGame();
         }
+        if (saveGuiVisible == true) {
+            savingText();
+        }
+        if (saveGuiVisible == false) {
+            DrawText("Saved!", screenWidth / 2 - 50, 340, 20, GREEN); // Feedback to user
+        }
+        
+
         break;
     }
 
@@ -85,7 +107,7 @@ void updateGame(GameState* gameState) {
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         processClick(&hint, &LastClicks, mousePosition, &head);
     }
-    if (GuiButton((Rectangle) { screenWidth / 2 + 500, screenHeight / 2 + 25, 100, 30 }, "SHUFFLE")) {
+    if (GuiButton((Rectangle) { screenWidth / 2 + 500, screenHeight / 2 + 25, 100, 30 }, "SHUFFLE (TAB)") || IsKeyPressed(KEY_TAB)) {
         deletePointsforShuffle(gameState);
         resetHint(&hint);
         resetLastClicks(&LastClicks);
@@ -93,7 +115,7 @@ void updateGame(GameState* gameState) {
         shuffle_all(&hint, isExist, original);
         countMatchableTiles(gameState);
     }
-    if (GuiButton((Rectangle) { screenWidth / 2 + 500, screenHeight / 2 + 100, 100, 30 }, "HINT")) {
+    if (GuiButton((Rectangle) { screenWidth / 2 + 500, screenHeight / 2 + 100, 100, 30 }, "HINT (SPACE)") || IsKeyPressed(KEY_SPACE)) {
         deletePointsforHint(gameState);
         PlaySound(gameButtonSound);
         resetHint(&hint);
@@ -101,7 +123,7 @@ void updateGame(GameState* gameState) {
         countMatchableTiles(gameState);
         giveHint(&hint, &LastClicks, clickable_freq);
     }
-    if (GuiButton((Rectangle) { screenWidth / 2 + 500, screenHeight / 2 + 175, 100, 30 }, "UNDO")) {
+    if (GuiButton((Rectangle) { screenWidth / 2 + 500, screenHeight / 2 + 175, 100, 30 }, "UNDO (BACK)") || IsKeyPressed(KEY_BACKSPACE)) {
         PlaySound(gameButtonSound);
         deleteBegin(&head, isExist, &LastClicks);
         countMatchableTiles(gameState);
@@ -111,7 +133,10 @@ void updateGame(GameState* gameState) {
         PlaySound(buttonSound);
         gameState->gameScreen = starting;
         gameState->isMapSelected = false;
-        resetGame();
+    }
+    if (GuiButton((Rectangle) { screenWidth / 2 + 500, screenHeight / 2 + 325, 100, 30 }, "END (X)") || IsKeyPressed(KEY_X)) {
+        PlaySound(buttonSound);
+        gameState->gameScreen = gameOver;
     }
     (*gameState).gameTime = GetTime() - (*gameState).startTime;
     gameState->matchable = countMatchableTiles(&gameState);

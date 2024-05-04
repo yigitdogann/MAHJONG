@@ -42,4 +42,11 @@ void drawGame();
 
 void resetGame();
 
+void savingText();
+
+void sort_and_write_scores(const char*,const char*, int);
+
+int compare_scores(const void*, const void*);
+
+void print10();
 #endif
