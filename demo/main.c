@@ -56,19 +56,16 @@ void updateAndDraw() {
         break;
     case game:
         drawGame();
+        drawCombo();
         updateGame(&gameState);
         break;
     case gameOver:
-        DrawTexture(backGroundTexture[2], 0, 0, WHITE);
-        if (gameState.totalPoint > point[10]) {
-            DrawText("NEW HIGH SCORE!!!", 500, 100, 100, GOLD);
-        }
+        DrawTexture(backGroundTexture[2], 0, 0, (Color) { 213, 194, 105, 255 });
         if (GuiButton((Rectangle) { 670, 610, 100, 30 }, "MAIN")) {
             //high score yapılabilir
             PlaySound(buttonSound);
-            gameState.gameScreen = starting;
-            gameState.isMapSelected = false;
             resetGame();
+            gameState.gameScreen = starting;
         }
         if (saveGuiVisible == true) {
             savingText();
@@ -82,15 +79,15 @@ void updateAndDraw() {
         DrawTexture(backGroundTexture[3], 0, 0, WHITE);
         if (GuiButton((Rectangle) { 670, 610, 100, 30 }, "MAIN")) {
             PlaySound(buttonSound);
-            gameState.gameScreen = starting;
-            gameState.isMapSelected = false;
             resetGame();
+            gameState.gameScreen = starting;
         }
         if (saveGuiVisible == true) {
             savingText();
         }
         if (saveGuiVisible == false) {
             DrawText("Saved!", screenWidth / 2 - 50, 340, 20, GREEN); // Feedback to user
+            resetGame();
         }
         
 
@@ -131,16 +128,17 @@ void updateGame(GameState* gameState) {
     }
     if (GuiButton((Rectangle) { screenWidth / 2 + 500, screenHeight / 2 + 250, 100, 30 }, "MAIN")) {
         PlaySound(buttonSound);
+        resetGame();
         gameState->gameScreen = starting;
-        gameState->isMapSelected = false;
     }
     if (GuiButton((Rectangle) { screenWidth / 2 + 500, screenHeight / 2 + 325, 100, 30 }, "END (X)") || IsKeyPressed(KEY_X)) {
         PlaySound(buttonSound);
         gameState->gameScreen = gameOver;
     }
-    (*gameState).gameTime = GetTime() - (*gameState).startTime;
-    gameState->matchable = countMatchableTiles(&gameState);
+    gameState->gameTime = GetTime() - gameState->startTime;
+    gameState->matchable = countMatchableTiles(gameState);
     isGameOver(gameState);
+    updateCombo(gameState);
 }
 
 tile* getTopMostTile(tile tiles[ARRAY_Y][ARRAY_X][LAYER], Vector2 mousePosition) {
@@ -160,13 +158,12 @@ tile* getTopMostTile(tile tiles[ARRAY_Y][ARRAY_X][LAYER], Vector2 mousePosition)
 void processClick(LastTwoClicked* hint, LastTwoClicked* LastClicks, Vector2 mousePosition, node** head) {
     tile* pointer = NULL;
     resetHint(hint);
-
+    
     pointer = getTopMostTile(tiles, mousePosition);// imlec ile tiklanilan tasi point eder
     
     //tiklanilabilir bir tas ise && son tiklanilan tasa bir kez daha tiklanmiyorsa LastClicked guncellenir
     if (isClickable(pointer) && LastClicks->lastClicked != pointer) {
         PlaySound(selectSound); //secilebilir bir tasa tikladigi icin selectSound sesi verildi
-        (&gameState)->lastMatchTime = (&gameState)->gameTime; //en son 2tas bu surede silindi (komboda kullanilacak) 
 
         if (LastClicks->previousClicked != NULL) {//crash olmamasi icin eklendi, bos olan bir adresin degerini degistirmeye calisacakti, boylece program cokecekti 
             LastClicks->previousClicked->color = RAYWHITE;//eski onceki tiklanilani beyaz yapar (son 2yi kirmizi yapiyoruz o artik 3.)

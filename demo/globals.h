@@ -88,6 +88,7 @@ extern Sound gameButtonSound;
 //extern screen gameScreen;
 extern LastTwoClicked LastClicks;
 extern LastTwoClicked hint;
+extern Vector2 combo;
 
 extern ScoreEntry entries[MAX_LINES];
 extern char lines[MAX_LINES][MAX_LINE_LENGTH];
@@ -97,6 +98,8 @@ extern bool saveText;
 extern int* num_lines_read;
 extern char array[10][30]; // Array of strings, each can hold up to 29 characters plus null terminator
 extern int point[10];      // Array to store integers
+
+extern int offset;
 
 extern int map[ARRAY_Y][ARRAY_X];
 extern int newMap[ARRAY_Y][ARRAY_X][LAYER];

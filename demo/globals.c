@@ -18,6 +18,8 @@ int* num_lines_read = 10;
 char array[10][30]; // Array of strings, each can hold up to 29 characters plus null terminator
 int point[10];      // Array to store integers
 
+int offset = 80; 
+
 Sound gameSound;
 Sound buttonSound;
 Sound selectSound;
@@ -26,6 +28,7 @@ Sound gameButtonSound;
 
 LastTwoClicked LastClicks;
 LastTwoClicked hint;
+Vector2 combo;
 
 int map[ARRAY_Y][ARRAY_X];
 int newMap[ARRAY_Y][ARRAY_X][LAYER] = { 0 };

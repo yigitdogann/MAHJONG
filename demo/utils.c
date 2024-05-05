@@ -134,7 +134,7 @@ void InitObjects(LastTwoClicked* LastClicks) {
                 tiles[j][k][i].isExists = newMap[j][k][i]; // 3 boyutlu arrayde deger 1 ise oraya tas cizecegiz
 
                 tiles[j][k][i].rectangle.x = (float)(k * WIDTH / 2 - i * 10); //taslarin x ve y degerleri girildi, i ile carpim 3 boyun goruntusu kazandirmak icin eklendi
-                tiles[j][k][i].rectangle.y = (float)(j * HEIGHT / 2 - i * 10);
+                tiles[j][k][i].rectangle.y = (float)(j * HEIGHT / 2 - i * 10 + offset);
 
                 tiles[j][k][i].rectangle.width = (float)WIDTH; //tasin yuksekligi
                 tiles[j][k][i].rectangle.height = (float)HEIGHT;// tasin uzunlugu
@@ -329,21 +329,14 @@ void unloadGameSounds() {
 
 void addPoints(LastTwoClicked LastClicks, GameState* gameState) {
     int combo = gameState->combo;
-    float elapsedTime = gameState->gameTime - gameState->lastMatchTime;
     int point = LastClicks.lastClicked->point;
 
-    if (elapsedTime <= 6.0) {
-        if (combo < 3) {
-            combo++;
-        }
-    }
-    else if (elapsedTime > 6.0) {
-        combo = 1;
+    if (gameState->gameTime - gameState->lastMatchTime <= 6.0 && gameState->combo < 3) {
+        gameState->combo++;
     }
 
     gameState->totalPoint += 2 * combo * point;
     gameState->lastMatchTime = gameState->gameTime;
-    gameState->combo = combo;
 
     return;
 }
@@ -469,6 +462,7 @@ void resetGame() {
     (&gameState)->totalPoint = 0;
     (&gameState)->lastMatchTime = 0;
     (&gameState)->remainingTile = ARRAY_SIZE;
+    (&gameState)->isMapSelected = false;
     saveGuiVisible = true;
     free(head);
 }
@@ -483,7 +477,7 @@ void savingText() {
 
         DrawText("Saved!", screenWidth / 2 - 50, 340, 20, GREEN); // Feedback to user
     }
-
+    DrawText("Enter a name: ", screenWidth / 2 - 130, 100, 40, GOLD);
     GuiTextBox((Rectangle) { screenWidth / 2 - 100, 200, 200, 30 }, text, 256, true);
 
     if (!saveGuiVisible && fopen("../output.txt", "r") == NULL) {
@@ -536,7 +530,7 @@ void print10() {
     }
 
     for (size_t i = 0; i < 10; i++) {
-        if (fscanf(file3, "%29s %d", array[i], &point[i]) != 2) {
+        if (fscanf(file3, "%s %d", array[i], &point[i]) != 2) {
             printf("Error reading line %zu\n", i + 1);
             break; // Exit loop if there is a mismatch or not enough data
         }
@@ -545,6 +539,32 @@ void print10() {
     fclose(file3); // Close the file after reading
 
     for (int i = 0; i < 10; i++) {
-        DrawText(TextFormat("%s %d", array[i], point[i]), 10, 20 + i * 70, 50, GOLD); // Adjust position and size as needed
+        DrawText(TextFormat("%d. %s %d", i+1, array[i], point[i]), 10, 20 + i * 70, 50, GOLD); // Adjust position and size as needed
+    }
+    if (gameState.totalPoint > point[9]) {
+        DrawText("NEW HIGH SCORE!!!", 500, 400, 100, GOLD);
+    }
+}
+
+void updateCombo(GameState* gameState) {
+    if (gameState->gameTime - gameState->lastMatchTime < 6.0 && gameState->combo == 1) {
+        gameState->combo++;
+    }
+    if (gameState->gameTime - gameState->lastMatchTime > 6.0 && (gameState->combo == 2 || gameState->combo == 3)) {
+        gameState->combo = 1;
+    }
+    //printf("%d\n", gameState->combo);
+    printf("combo:%d elapsedTime: %f\n", gameState->combo, gameState->gameTime - gameState->lastMatchTime);
+}
+
+void drawCombo() {
+    int width = 150 * (6 - (gameState.gameTime - gameState.lastMatchTime));
+    if (gameState.combo == 2) {
+        DrawRectangle(155, 20, width, 60, (Color) { 235, 227, 197, 255 });
+        DrawTexture(symbolsTexture[0], 100, 10, RAYWHITE);
+    }
+    else if (gameState.combo == 3) {
+        DrawRectangle(155, 20, width, 60, (Color) { 213, 194, 105, 255 });
+        DrawTexture(symbolsTexture[1], 100, 10, RAYWHITE);
     }
 }

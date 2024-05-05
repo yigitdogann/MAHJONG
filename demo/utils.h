@@ -4,8 +4,11 @@
 #include "globals.h"
 
 void InitImagesSounds();
+
 void readFile(GameState*);
+
 void InitMap();
+
 void InitObjects(LastTwoClicked*);
 
 bool isClickable(tile*);
@@ -49,4 +52,9 @@ void sort_and_write_scores(const char*,const char*, int);
 int compare_scores(const void*, const void*);
 
 void print10();
+
+void updateCombo(GameState*);
+
+void drawCombo();
+
 #endif
