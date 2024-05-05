@@ -471,7 +471,17 @@ void savingText() {
     // GUI to get text input and handle save trigger
     if (GuiButton((Rectangle) { screenWidth / 2 - 50, 300, 100, 30 }, "Save Text") || IsKeyPressed(KEY_ENTER)) {
         saveGuiVisible = false; // Hide the GUI elements after interaction
-
+        /*int blank = 0;
+        for (int i = 0; i < strlen(text); i++) {
+            if (isblank(text[i])) {
+                blank++;
+            }
+        }
+        for (int i = 0; i < blank-1; i++){
+            if (isblank(text[i])) {
+                text[i] = '_';
+            }
+        }*/
         // Sort and save the new entry
         sort_and_write_scores("../output.txt", text, gameState.totalPoint);
 
@@ -479,6 +489,7 @@ void savingText() {
     }
     DrawText("Enter a name: ", screenWidth / 2 - 130, 100, 40, GOLD);
     GuiTextBox((Rectangle) { screenWidth / 2 - 100, 200, 200, 30 }, text, 256, true);
+    
 
     if (!saveGuiVisible && fopen("../output.txt", "r") == NULL) {
         DrawText("Failed to save!", screenWidth / 2 - 50, 340, 20, RED); // Error message if file opening fails
