@@ -530,7 +530,7 @@ void print10() {
     }
 
     for (size_t i = 0; i < 10; i++) {
-        if (fscanf(file3, "%s %d", array[i], &point[i]) != 2) {
+        if (fscanf(file3, "%29s %d", array[i], &point[i]) != 2) {
             printf("Error reading line %zu\n", i + 1);
             break; // Exit loop if there is a mismatch or not enough data
         }
@@ -541,16 +541,13 @@ void print10() {
     for (int i = 0; i < 10; i++) {
         DrawText(TextFormat("%d. %s %d", i+1, array[i], point[i]), 10, 20 + i * 70, 50, GOLD); // Adjust position and size as needed
     }
-    if (gameState.totalPoint > point[9]) {
-        DrawText("NEW HIGH SCORE!!!", 500, 400, 100, GOLD);
-    }
 }
 
 void updateCombo(GameState* gameState) {
     if (gameState->gameTime - gameState->lastMatchTime < 6.0 && gameState->combo == 1) {
         gameState->combo++;
     }
-    if (gameState->gameTime - gameState->lastMatchTime > 6.0 && (gameState->combo == 2 || gameState->combo == 3)) {
+    else if (gameState->gameTime - gameState->lastMatchTime > 6.0 && (gameState->combo == 2 || gameState->combo == 3)) {
         gameState->combo = 1;
     }
     //printf("%d\n", gameState->combo);

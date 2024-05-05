@@ -55,6 +55,7 @@ typedef struct GameState {
     double startTime;
     double gameTime;
     double lastMatchTime;
+    double lastUndoTime;
 
     // Additional game states like current level, score, etc.
 } GameState;

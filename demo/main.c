@@ -50,8 +50,8 @@ void updateAndDraw() {
             gameState.remainingTile = ARRAY_SIZE;
             gameState.startTime = GetTime();
             gameState.gameScreen = game;
-            // Now draw the initial game state
-            DrawTexture(backGroundTexture[1], 0, 0, WHITE); // Assuming texture 1 is for the game
+
+            DrawTexture(backGroundTexture[1], 0, 0, WHITE); 
         }
         break;
     case game:
@@ -60,20 +60,23 @@ void updateAndDraw() {
         updateGame(&gameState);
         break;
     case gameOver:
-        DrawTexture(backGroundTexture[2], 0, 0, (Color) { 213, 194, 105, 255 });
+        DrawTexture(backGroundTexture[2], 0, 0, RAYWHITE);
         if (GuiButton((Rectangle) { 670, 610, 100, 30 }, "MAIN")) {
-            //high score yapılabilir
             PlaySound(buttonSound);
             resetGame();
             gameState.gameScreen = starting;
         }
-        if (saveGuiVisible == true) {
+        if (saveGuiVisible == true && gameState.totalPoint > point[9]) {
             savingText();
         }
         if (saveGuiVisible == false) {
             DrawText("Saved!", screenWidth / 2 - 50, 340, 20, GREEN); // Feedback to user
         }
         print10();
+        if (gameState.totalPoint > point[9]) {
+            DrawText("NEW HIGH SCORE!!!", 500, 400, 100, GOLD);
+        }
+
         break;
     case victory:
         DrawTexture(backGroundTexture[3], 0, 0, WHITE);
@@ -125,6 +128,8 @@ void updateGame(GameState* gameState) {
         deleteBegin(&head, isExist, &LastClicks);
         countMatchableTiles(gameState);
         resetLastClicks(&LastClicks);
+        gameState->combo = 1;
+        gameState->lastMatchTime = gameState->lastMatchTime - 7;
     }
     if (GuiButton((Rectangle) { screenWidth / 2 + 500, screenHeight / 2 + 250, 100, 30 }, "MAIN")) {
         PlaySound(buttonSound);
