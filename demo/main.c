@@ -62,8 +62,8 @@ void updateAndDraw() {
     case gameOver:
         DrawTexture(backGroundTexture[2], 0, 0, RAYWHITE);
         if (GuiButton((Rectangle) { 670, 610, 100, 30 }, "MAIN")) {
-            PlaySound(buttonSound);
             resetGame();
+            PlaySound(buttonSound);
             gameState.gameScreen = starting;
         }
         if (saveGuiVisible == true && gameState.totalPoint > point[9]) {
@@ -128,8 +128,6 @@ void updateGame(GameState* gameState) {
         deleteBegin(&head, isExist, &LastClicks);
         countMatchableTiles(gameState);
         resetLastClicks(&LastClicks);
-        gameState->combo = 1;
-        gameState->lastMatchTime = gameState->lastMatchTime - 7;
     }
     if (GuiButton((Rectangle) { screenWidth / 2 + 500, screenHeight / 2 + 250, 100, 30 }, "MAIN")) {
         PlaySound(buttonSound);

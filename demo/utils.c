@@ -47,7 +47,7 @@ void InitImagesSounds() {
     selectSound = LoadSound("../assets/selectSound.mp3");
     mapSelectionSound = LoadSound("../assets/mapSelectionSound.mp3");
     gameButtonSound = LoadSound("../assets/gameButtonSound.mp3");
-    
+    (&gameState)->combo = 1;
     //UnloadSound(gameSound);     // Unload sound data
     for (int i = 0; i < NUM_IMAGES; i++) {
         char filePath[NUM_IMAGES]; // Buffer to hold the file path
@@ -330,8 +330,7 @@ void unloadGameSounds() {
 void addPoints(LastTwoClicked LastClicks, GameState* gameState) {
     int combo = gameState->combo;
     int point = LastClicks.lastClicked->point;
-
-    if (gameState->gameTime - gameState->lastMatchTime <= 6.0 && gameState->combo < 3) {
+    if (gameState->combo < 3) {
         gameState->combo++;
     }
 
@@ -555,10 +554,10 @@ void print10() {
 }
 
 void updateCombo(GameState* gameState) {
-    if (gameState->gameTime - gameState->lastMatchTime < 6.0 && gameState->combo == 1) {
-        gameState->combo++;
-    }
-    else if (gameState->gameTime - gameState->lastMatchTime > 6.0 && (gameState->combo == 2 || gameState->combo == 3)) {
+    /*if (gameState->combo == 0) {
+        gameState->combo = 1;
+    }*/
+    if (gameState->gameTime - gameState->lastMatchTime > 6.0) {
         gameState->combo = 1;
     }
     //printf("%d\n", gameState->combo);
