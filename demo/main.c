@@ -123,11 +123,12 @@ void updateGame(GameState* gameState) {
         countMatchableTiles(gameState);
         giveHint(&hint, &LastClicks, clickable_freq);
     }
-    if (GuiButton((Rectangle) { screenWidth / 2 + 500, screenHeight / 2 + 175, 100, 30 }, "UNDO (BACK)") || IsKeyPressed(KEY_BACKSPACE)) {
+    if (GuiButton((Rectangle) { screenWidth / 2 + 500, screenHeight / 2 + 175, 100, 30 }, "UNDO (CTRL)") || IsKeyPressed(KEY_LEFT_CONTROL)) {
         PlaySound(gameButtonSound);
         deleteBegin(&head, isExist, &LastClicks);
         countMatchableTiles(gameState);
         resetLastClicks(&LastClicks);
+        gameState->combo = 1;
     }
     if (GuiButton((Rectangle) { screenWidth / 2 + 500, screenHeight / 2 + 250, 100, 30 }, "MAIN")) {
         PlaySound(buttonSound);
@@ -207,6 +208,9 @@ void addBegin(node** head, LastTwoClicked* LastClicks, int* isExist) {
     newNode->data1 = LastClicks->lastClicked; //son tiklanilan ciftin adresini tut
     newNode->data2 = LastClicks->previousClicked;
 
+    newNode->data1->combo = (&gameState)->combo;
+    newNode->data2->combo = (&gameState)->combo;
+
     isExist[newNode->data1->order] = 0;//linked liste eklerken o taşa karşılık değer 0 oldu
     isExist[newNode->data2->order] = 0;
    
@@ -263,6 +267,8 @@ void deleteBegin(node** head, int* isExist, LastTwoClicked* LastClicks) {
 
     tempNode->data1->isExists = true;//linked listten silerken cizilebilir hale getir
     tempNode->data2->isExists = true;
+    
+    (&gameState)->totalPoint += -2 * tempNode->data1->combo * tempNode->data1->point;
 
     isExist[tempNode->data1->order] = 1;//linked listten silerken o taşa karşılık değer 1 oldu
     isExist[tempNode->data2->order] = 1;

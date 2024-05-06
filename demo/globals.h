@@ -28,6 +28,7 @@ typedef struct tile {
     Texture2D texture;
     Color color;
     int x, y, z;
+    int combo;
 }tile;
 
 typedef struct LastTwoClicked {
