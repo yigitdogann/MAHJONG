@@ -81,18 +81,20 @@ void updateAndDraw() {
     case victory:
         DrawTexture(backGroundTexture[3], 0, 0, WHITE);
         if (GuiButton((Rectangle) { 670, 610, 100, 30 }, "MAIN")) {
-            PlaySound(buttonSound);
             resetGame();
+            PlaySound(buttonSound);
             gameState.gameScreen = starting;
         }
-        if (saveGuiVisible == true) {
+        if (saveGuiVisible == true && gameState.totalPoint > point[9]) {
             savingText();
         }
         if (saveGuiVisible == false) {
             DrawText("Saved!", screenWidth / 2 - 50, 340, 20, GREEN); // Feedback to user
-            resetGame();
         }
-        
+        print10();
+        if (gameState.totalPoint > point[9]) {
+            DrawText("NEW HIGH SCORE!!!", 500, 400, 100, GOLD);
+        }        
 
         break;
     }
