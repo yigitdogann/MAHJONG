@@ -1,52 +1,60 @@
 ﻿#include "utils.h"
 
 void InitImagesSounds() {
-    backGround[1] = LoadImage("../assets/bg-black.png"); //arkaplan ekleme 
+    backGround[1] = LoadImage("../assets/backgrounds/bg-black.png"); //arkaplan ekleme 
     backGroundTexture[1] = LoadTextureFromImage(backGround[1]);
     UnloadImage(backGround[1]);
 
-    backGround[0] = LoadImage("../assets/background2.png"); //arkaplan ekleme 
+    backGround[0] = LoadImage("../assets/backgrounds/background2.png"); //arkaplan ekleme 
     backGroundTexture[0] = LoadTextureFromImage(backGround[0]);
     UnloadImage(backGround[0]);
     
-    backGround[2] = LoadImage("../assets/gameOver.png"); //arkaplan ekleme 
+    backGround[2] = LoadImage("../assets/backgrounds/gameOver.png"); //arkaplan ekleme 
     backGroundTexture[2] = LoadTextureFromImage(backGround[2]);
     UnloadImage(backGround[2]);
 
-    backGround[3] = LoadImage("../assets/victory.png"); //arkaplan ekleme 
+    backGround[3] = LoadImage("../assets/backgrounds/victory.png"); //arkaplan ekleme 
     backGroundTexture[3] = LoadTextureFromImage(backGround[3]);
     UnloadImage(backGround[3]);
 
-    //
-    symbols[0] = LoadImage("../assets/2x.png"); //arkaplan ekleme 
+    symbols[0] = LoadImage("../assets/symbols/2x.png"); //arkaplan ekleme 
     symbolsTexture[0] = LoadTextureFromImage(symbols[0]);
     UnloadImage(symbols[0]);
 
-    symbols[1] = LoadImage("../assets/3x.png"); //arkaplan ekleme 
+    symbols[1] = LoadImage("../assets/symbols/3x.png"); //arkaplan ekleme 
     symbolsTexture[1] = LoadTextureFromImage(symbols[1]);
     UnloadImage(symbols[1]);
 
-    symbols[2] = LoadImage("../assets/heart.png"); //arkaplan ekleme 
+    symbols[2] = LoadImage("../assets/symbols/heart.png"); //arkaplan ekleme 
     symbolsTexture[2] = LoadTextureFromImage(symbols[2]);
     UnloadImage(symbols[2]);
 
-    symbols[3] = LoadImage("../assets/hourglass.png"); //arkaplan ekleme 
+    symbols[3] = LoadImage("../assets/symbols/hourglass.png"); //arkaplan ekleme 
     symbolsTexture[3] = LoadTextureFromImage(symbols[3]);
     UnloadImage(symbols[3]);
     
-    symbols[4] = LoadImage("../assets/removable.png"); //arkaplan ekleme 
+    symbols[4] = LoadImage("../assets/symbols/removable.png"); //arkaplan ekleme 
     symbolsTexture[4] = LoadTextureFromImage(symbols[4]);
     UnloadImage(symbols[4]);
 
-    symbols[5] = LoadImage("../assets/trophy.png"); //arkaplan ekleme 
+    symbols[5] = LoadImage("../assets/symbols/trophy.png"); //arkaplan ekleme 
     symbolsTexture[5] = LoadTextureFromImage(symbols[5]);
     UnloadImage(symbols[5]);
 
-    //gameSound = LoadSound("../assets/relaxing.mp3");
-    buttonSound = LoadSound("../assets/PixbuttonSound.wav");
-    selectSound = LoadSound("../assets/selectSound.mp3");
-    mapSelectionSound = LoadSound("../assets/mapSelectionSound.mp3");
-    gameButtonSound = LoadSound("../assets/gameButtonSound.mp3");
+    symbols[6] = LoadImage("../assets/symbols/highScore.png"); //arkaplan ekleme 
+    symbolsTexture[6] = LoadTextureFromImage(symbols[6]);
+    UnloadImage(symbols[6]);
+    
+    symbols[7] = LoadImage("../assets/symbols/newRecord.png"); //arkaplan ekleme 
+    symbolsTexture[7] = LoadTextureFromImage(symbols[7]);
+    UnloadImage(symbols[7]);
+
+    gameSound = LoadSound("../assets/sounds/soundtrack.mp3");
+    buttonSound = LoadSound("../assets/sounds/PixbuttonSound.wav");
+    selectSound = LoadSound("../assets/sounds/selectSound.mp3");
+    mapSelectionSound = LoadSound("../assets/sounds/mapSelectionSound.mp3");
+    gameButtonSound = LoadSound("../assets/sounds/gameButtonSound.mp3");
+    shuffleSound = LoadSound("../assets/sounds/shuffleSound.wav");
     (&gameState)->combo = 1;
     //UnloadSound(gameSound);     // Unload sound data
     for (int i = 0; i < NUM_IMAGES; i++) {
@@ -61,7 +69,7 @@ void InitImagesSounds() {
 void readFile(GameState* gameState) {
     if (GuiButton((Rectangle) { screenWidth / 2 - 45, screenHeight / 2 - 100, 100, 30 }, "EASY")) {
         PlaySound(mapSelectionSound);
-        file = fopen("../assets/map2.txt", "r"); //dosyayi oku 
+        file = fopen("../assets/maps/map2.txt", "r"); //dosyayi oku 
         if (file == NULL) { //dosyayi okumazsan konsola error ver
             perror("Failed to open file");
             return;
@@ -70,7 +78,7 @@ void readFile(GameState* gameState) {
     }
     else if (GuiButton((Rectangle) { screenWidth / 2 - 45, screenHeight / 2 - 50, 100, 30 }, "NORMAL")) {
         PlaySound(mapSelectionSound);
-        file = fopen("../assets/map3.txt", "r"); //dosyayi oku 
+        file = fopen("../assets/maps/map3.txt", "r"); //dosyayi oku 
         if (file == NULL) { //dosyayi okumazsan konsola error ver
             perror("Failed to open file");
             return;
@@ -79,7 +87,7 @@ void readFile(GameState* gameState) {
     }
     else if (GuiButton((Rectangle) { screenWidth / 2 - 45, screenHeight / 2, 100, 30 }, "EXPERT")) {
         PlaySound(mapSelectionSound);
-        file = fopen("../assets/map1.txt", "r"); //dosyayi oku 
+        file = fopen("../assets/maps/map1.txt", "r"); //dosyayi oku 
         if (file == NULL) { //dosyayi okumazsan konsola error ver
             perror("Failed to open file");
             return;
@@ -470,8 +478,12 @@ void resetGame() {
     }
 
     randomFiller(original);
-    resetHint(&hint);
-    resetLastClicks(&LastClicks);
+    if (&hint != NULL) {
+        resetHint(&hint);
+    }
+    if (&LastClicks != NULL) {
+        resetLastClicks(&LastClicks);
+    }
     (&gameState)->combo = 1;
     (&gameState)->gameTime = 0;
     (&gameState)->totalPoint = 0;
@@ -479,8 +491,8 @@ void resetGame() {
     (&gameState)->remainingTile = ARRAY_SIZE;
     (&gameState)->isMapSelected = false;
     saveGuiVisible = true;
-    free(head);
-
+    head = NULL;
+    strcpy(text, "\0");
     for (int i = 0; i < 1024; i++) {
         strcpy(entries[i].text, "\0");
         entries[i].points = 0;
@@ -489,7 +501,7 @@ void resetGame() {
 
 void savingText() {
     // GUI to get text input and handle save trigger
-    if (GuiButton((Rectangle) { screenWidth / 2 - 50, 300, 100, 30 }, "Save Text") || IsKeyPressed(KEY_ENTER)) {
+    if (GuiButton((Rectangle) { 790, 400, 100, 30 }, "Save Text") || IsKeyPressed(KEY_ENTER)) {
         saveGuiVisible = false; // Hide the GUI elements after interaction
         /*int blank = 0;
         for (int i = 0; i < strlen(text); i++) {
@@ -503,15 +515,14 @@ void savingText() {
             }
         }*/
         // Sort and save the new entry
-        sort_and_write_scores("../output.txt", text, gameState.totalPoint);
+        sort_and_write_scores("../assets/highscores.txt", text, gameState.totalPoint);
         printf("%s\n", text);
-        DrawText("Saved!", screenWidth / 2 - 50, 340, 20, GREEN); // Feedback to user
     }
-    DrawText("Enter a name: ", screenWidth / 2 - 130, 100, 40, GOLD);
-    GuiTextBox((Rectangle) { screenWidth / 2 - 100, 200, 200, 30 }, text, 256, true);
+    DrawText("Enter a name: ", screenWidth / 2 - 240, 354, 25, RAYWHITE);
+    GuiTextBox((Rectangle) { screenWidth / 2 - 50, 350, 220, 30 }, text, 256, true);
     
 
-    if (!saveGuiVisible && fopen("../output.txt", "r") == NULL) {
+    if (!saveGuiVisible && fopen("../assets/highscores.txt", "r") == NULL) {
         DrawText("Failed to save!", screenWidth / 2 - 50, 340, 20, RED); // Error message if file opening fails
     }
 }
@@ -519,7 +530,7 @@ void savingText() {
 void sort_and_write_scores(const char* filename, const char* text, int points) {
     int count = 0;
     // Read existing data
-    FILE* file1 = fopen("../output.txt", "r");
+    FILE* file1 = fopen("../assets/highscores.txt", "r");
     if (file != NULL) {
         while (fscanf(file, "%s %d\n", entries[count].text, &entries[count].points) == 2) {
             if (++count >= MAX_LINES) break;
@@ -534,7 +545,7 @@ void sort_and_write_scores(const char* filename, const char* text, int points) {
 
     qsort(entries, count, sizeof(ScoreEntry), compare_scores);
 
-    file1 = fopen("../output.txt", "w");
+    file1 = fopen("../assets/highscores.txt", "w");
     if (file1 != NULL) {
         for (int i = 0; i < count; i++) {
             printf("%s", entries[i].text);
@@ -551,17 +562,17 @@ int compare_scores(const void* a, const void* b) {
 }
 
 void print10() {
-    FILE* file3 = fopen("../output.txt", "r");
+    FILE* file3 = fopen("../assets/highscores.txt", "r");
     if (file3 == NULL) {
         perror("Failed to open file");
         return; // Exit if file opening fails
     }
 
-    char line[31];
+    char line[50];
     int i = 0;
     while (fgets(line, sizeof(line), file3) && i < 10) {
         // Attempt to parse the string and the integer from the line
-        if (sscanf(line, "%31[^\n0123456789] %d", array[i], &point[i]) != 2) {
+        if (sscanf(line, "%50[^\n0123456789] %d", array[i], &point[i]) != 2) {
             printf("Error reading line %d\n", i + 1);
             break; // Break if parsing fails
         }
@@ -571,7 +582,7 @@ void print10() {
     fclose(file3); // Close the file after reading
 
     for (int i = 0; i < 10; i++) {
-        DrawText(TextFormat("%d. %s %d", i+1, array[i], point[i]), 10, 20 + i * 70, 50, GOLD); // Adjust position and size as needed
+        DrawText(TextFormat("%d %s %d", i+1, array[i], point[i]), 60, 160 + i * 70, 35, RAYWHITE); // Adjust position and size as needed
     }
 }
 
@@ -593,7 +604,19 @@ void drawCombo() {
     }
 }
 
-void shake() {
-    shakeTime = 10;
-    
+void endScreen() {
+    DrawTexture(symbolsTexture[6], 30, 30, RAYWHITE);
+    StopSound(gameSound);
+    if (GuiButton((Rectangle) { 670, 400, 100, 30 }, "MAIN")) {
+        resetGame();
+        PlaySound(buttonSound);
+        gameState.gameScreen = starting;
+    }
+    if (saveGuiVisible == true && gameState.totalPoint > point[9]) {
+        savingText();
+    }
+    print10();
+    if (gameState.totalPoint > point[9]) {
+        DrawTexture(symbolsTexture[7], 1130, 615, RAYWHITE);
+    }
 }

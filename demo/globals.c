@@ -6,8 +6,8 @@ Texture2D textures[NUM_IMAGES]; // Array to hold textures
 Image backGround[4];    // background
 Texture2D backGroundTexture[4];
 
-Image symbols[6];
-Texture2D symbolsTexture[6];
+Image symbols[8];
+Texture2D symbolsTexture[8];
 
 ScoreEntry entries[MAX_LINES];
 char lines[MAX_LINES][MAX_LINE_LENGTH];
@@ -25,6 +25,7 @@ Sound buttonSound;
 Sound selectSound;
 Sound mapSelectionSound;
 Sound gameButtonSound;
+Sound shuffleSound;
 
 LastTwoClicked LastClicks;
 LastTwoClicked hint;

@@ -79,14 +79,15 @@ extern Texture2D textures[NUM_IMAGES]; // Array to hold textures
 extern Image backGround[4];    // background
 extern Texture2D backGroundTexture[4];
 
-extern Image symbols[6]; 
-extern Texture2D symbolsTexture[6];
+extern Image symbols[8]; 
+extern Texture2D symbolsTexture[8];
 
 extern Sound gameSound;
 extern Sound buttonSound;
 extern Sound selectSound;
 extern Sound mapSelectionSound;
 extern Sound gameButtonSound;
+extern Sound shuffleSound;
 
 //extern screen gameScreen;
 extern LastTwoClicked LastClicks;

@@ -59,6 +59,8 @@ void updateCombo(GameState*);
 
 void drawCombo();
 
-void shake();
+//void shake();
+
+void endScreen();
 
 #endif

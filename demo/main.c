@@ -28,8 +28,6 @@ int main(void) {
     InitAudioDevice();
     SetTargetFPS(60);
     InitImagesSounds();
-    //PlaySound(gameSound);
-    
     while (!WindowShouldClose()){
         //if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
         //{
@@ -72,7 +70,7 @@ void updateAndDraw() {
             gameState.remainingTile = ARRAY_SIZE;
             gameState.startTime = GetTime();
             gameState.gameScreen = game;
-
+            PlaySound(gameSound);
             DrawTexture(backGroundTexture[1], 0, 0, WHITE); 
         }
         break;
@@ -83,40 +81,11 @@ void updateAndDraw() {
         break;
     case gameOver:
         DrawTexture(backGroundTexture[2], 0, 0, RAYWHITE);
-        if (GuiButton((Rectangle) { 670, 610, 100, 30 }, "MAIN")) {
-            resetGame();
-            PlaySound(buttonSound);
-            gameState.gameScreen = starting;
-        }
-        if (saveGuiVisible == true && gameState.totalPoint > point[9]) {
-            savingText();
-        }
-        if (saveGuiVisible == false) {
-            DrawText("Saved!", screenWidth / 2 - 50, 340, 20, GREEN); // Feedback to user
-        }
-        print10();
-        if (gameState.totalPoint > point[9]) {
-            DrawText("NEW HIGH SCORE!!!", 500, 400, 100, GOLD);
-        }
-
+        endScreen();
         break;
     case win:
-        DrawTexture(backGroundTexture[3], 0, 0, WHITE);
-        if (GuiButton((Rectangle) { 670, 610, 100, 30 }, "MAIN")) {
-            resetGame();
-            PlaySound(buttonSound);
-            gameState.gameScreen = starting;
-        }
-        if (saveGuiVisible == true && gameState.totalPoint > point[9]) {
-            savingText();
-        }
-        if (saveGuiVisible == false) {
-            DrawText("Saved!", screenWidth / 2 - 50, 340, 20, GREEN); // Feedback to user
-        }
-        print10();
-        if (gameState.totalPoint > point[9]) {
-            DrawText("NEW HIGH SCORE!!!", 500, 400, 100, GOLD);
-        }        
+        DrawTexture(backGroundTexture[3], 0, 0, RAYWHITE);
+        endScreen();
 
         break;
     }
@@ -134,7 +103,7 @@ void updateGame(GameState* gameState) {
         deletePointsforShuffle(gameState);
         resetHint(&hint);
         resetLastClicks(&LastClicks);
-        PlaySound(buttonSound); //butona basildigi icin buton sesi verildi
+        PlaySound(shuffleSound); //butona basildigi icin buton sesi verildi
         shuffle_all(&hint, isExist, original);
         countMatchableTiles(gameState);
     }
@@ -145,10 +114,6 @@ void updateGame(GameState* gameState) {
         resetHint(&hint);
         resetLastClicks(&LastClicks);
         giveHint(&hint, &LastClicks, clickable_freq);
-
-        if (gameState->matchable == 0) {
-            shakeTime = 10;
-        }
     }
     if (GuiButton((Rectangle) { screenWidth / 2 + 500, screenHeight / 2 + 175, 100, 30 }, "UNDO (CTRL)") || IsKeyPressed(KEY_LEFT_CONTROL)) {
         PlaySound(gameButtonSound);
@@ -156,6 +121,7 @@ void updateGame(GameState* gameState) {
         countMatchableTiles(gameState);
         resetLastClicks(&LastClicks);
         gameState->combo = 1;
+
     }
     if (GuiButton((Rectangle) { screenWidth / 2 + 500, screenHeight / 2 + 250, 100, 30 }, "MAIN")) {
         PlaySound(buttonSound);
@@ -247,11 +213,10 @@ int giveHint(LastTwoClicked* hint, LastTwoClicked* LastClicks, int* clickable_fr
         }
     }
 
-    if (hintedId == -1) {
-        printf("there are no removable\n"); //tahtada erişilebilecek taş olmadığını söyler
-        return 1;
+    if (gameState.matchable == 0) {
+        shakeTime = 10;
     }
-    
+
     for (int i = 0; i < LAYER; i++) {
         for (int j = 0; j < ARRAY_Y; j++) {
             for (int k = 0; k < ARRAY_X; k++) {
@@ -278,8 +243,9 @@ int giveHint(LastTwoClicked* hint, LastTwoClicked* LastClicks, int* clickable_fr
 
 void deleteBegin(node** head, int* isExist, LastTwoClicked* LastClicks) {
     if (*head == NULL) {//linked listten kaldirilacak oge yok, linked list zaten bos
-            shakeTime = 10;
-            return;
+        // printf("Linked list is already empty\n");
+        shakeTime = 10;
+        return;
     }
     node* tempNode = *head;
 

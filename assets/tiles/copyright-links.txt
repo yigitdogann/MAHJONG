@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 			====TILE DESIGNS====
 
 https://www.freepik.com/icon/dragon_14236098#fromView=search&page=1&position=10&uuid=9aed1b64-472d-46f6-9f96-353cb73a5d9c
@@ -39,4 +40,47 @@ https://www.freepik.com/icon/checked_7492346#fromView=search&page=1&position=64&
 https://www.freepik.com/icon/hourglass_15135175#fromView=search&page=1&position=2&uuid=e0d55c62-b80a-4676-a120-d107d455e7cb
 
 		--heart--
+=======
+			====TILE DESIGNS====
+
+https://www.freepik.com/icon/dragon_14236098#fromView=search&page=1&position=10&uuid=9aed1b64-472d-46f6-9f96-353cb73a5d9c
+
+https://www.freepik.com/icon/greek_14236070#fromView=resource_detail&position=11
+
+https://www.freepik.com/icon/bird_14236080#fromView=resource_detail&position=8
+
+https://www.freepik.com/icon/centaurs_14236101#fromView=resource_detail&position=1
+
+https://www.freepik.com/icon/bamboo_2602999#fromView=resource_detail&position=22
+
+https://www.freepik.com/icon/dragon_2602996
+
+https://www.freepik.com/icon/mount-fuji_410207#fromView=resource_detail&position=32
+
+https://www.freepik.com/icon/tokyo-tower_410223#fromView=resource_detail&position=4
+
+https://www.freepik.com/icon/world_14041592#fromView=resource_detail&position=16
+
+https://www.freepik.com/icon/world_14041645#fromView=resource_detail&position=6
+
+https://www.freepik.com/icon/world_14041586#fromView=resource_detail&position=17
+
+https://www.freepik.com/icon/compass_2536643
+
+https://www.freepik.com/icon/triangle_9068259#fromView=search&page=1&position=18&uuid=8af37f02-e6a2-4330-bcc9-c100f9e52b23
+
+https://www.freepik.com/icon/tile_8347287#fromView=search&page=1&position=80&uuid=3a51745a-711e-48d5-904b-40183a6dbf41
+
+https://www.freepik.com/icon/obwarzanek-krakowski_5840792#fromView=resource_detail&position=16
+
+https://www.freepik.com/icon/game_7960378#fromView=search&page=1&position=27&uuid=b26f35f6-704a-44c8-8881-2c0b87ddc66c
+
+		--check--
+https://www.freepik.com/icon/checked_7492346#fromView=search&page=1&position=64&uuid=820e5990-c5b9-4f75-9028-cb5794b1cba9
+
+		--hourglass--
+https://www.freepik.com/icon/hourglass_15135175#fromView=search&page=1&position=2&uuid=e0d55c62-b80a-4676-a120-d107d455e7cb
+
+		--heart--
+>>>>>>> c5b4fd390a50eac88665f15f744fc3f23f5e7177
 https://www.freepik.com/icon/heart_9131541#fromView=search&page=1&position=23&uuid=9c33e0de-7e4d-4cf4-85cf-b3d88e14147c
