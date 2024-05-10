@@ -47,4 +47,8 @@ const int screenWidth = 1440;
 const int screenHeight = 900;
 int framesCounter = 0; // Useful to count frames
 FILE* file;
-node* head = NULL; //linked list head pointer 
+node* head = NULL; //linked list head pointer
+
+int shakeTime = 0;
+float shakeMagnitude = 10.0f;
+Camera2D camera = { 0 };

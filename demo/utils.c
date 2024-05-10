@@ -229,6 +229,20 @@ bool isRemovable(LastTwoClicked LastClicks) {//son tiklanilan 2 tasi parametre o
     
 }
 
+tile* getTopMostTile(tile tiles[ARRAY_Y][ARRAY_X][LAYER], Vector2 mousePosition) {
+    for (int i = LAYER - 1; i >= 0; i--) {//ilk en yukaridaki layerlari kontrol et
+        for (int j = 0, a = 0; j < ARRAY_Y; j++) {
+            for (int k = 0; k < ARRAY_X; k++) {
+                if ((CheckCollisionPointRec(mousePosition, tiles[j][k][i].rectangle)) && tiles[j][k][i].isExists == true) { //3 boyutu da kontrol eder ve eger tas varsa, mousun ucundaki tasi bulur 
+                    return &tiles[j][k][i]; // pointera gonderir ileride kullanacagiz
+                }
+            }
+        }
+    }
+
+    return NULL;
+}
+
 void shuffleBasedOnCondition(int* a, int* b, int size, int x) {
     srand(time(NULL));  // Seed the random number generator
 
@@ -397,7 +411,7 @@ void isGameOver(GameState* gameState) {
 
     if (gameState->remainingTile == 0) {
         gameState->isMapSelected = false;
-        gameState->gameScreen = victory;
+        gameState->gameScreen = win;
         //printf("Game Over: Victory\n");
     }
     else if ((double)framesCounter / 60 - gameState->startTime > 300.0) {
@@ -414,13 +428,13 @@ void drawGame() {
     DrawTexture(symbolsTexture[4], screenWidth / 2 + 500, 220, WHITE);
     DrawTexture(symbolsTexture[3], screenWidth / 2 + 495, 20, WHITE);
     DrawTexture(symbolsTexture[2], screenWidth / 2 + 495, 320, WHITE);
-
+    
     DrawText(TextFormat("%d", (&gameState)->totalPoint), screenWidth / 2 + 570, 135, 40, RAYWHITE);
     DrawText(TextFormat("x %d", (&gameState)->matchable), screenWidth / 2 + 500 + 70, 240, 40, RAYWHITE);
     DrawText(TextFormat("%d:%.2d", gameState.minutes, gameState.seconds), screenWidth / 2 + 495 + 70, 40, 40, RAYWHITE);
     DrawText(TextFormat("x %d", gameState.remainingTile), screenWidth / 2 + 565, 340, 40, RAYWHITE);
     //DrawText(TextFormat("Remaining Tile: %.2lf", gameState.lastMatchTime), 1100, 500, 40, RED);
-
+    BeginMode2D(camera); // Begin 2D mode with camera
     for (int k = 1, a = 0; k < LAYER; k++) {
         for (int i = 0; i < ARRAY_Y; i++) {
             for (int j = 0; j < ARRAY_X; j++) {
@@ -430,6 +444,8 @@ void drawGame() {
             }
         }
     }
+
+    EndMode2D(); // End 2D mode
 }
 
 void resetGame() {
@@ -464,6 +480,11 @@ void resetGame() {
     (&gameState)->isMapSelected = false;
     saveGuiVisible = true;
     free(head);
+
+    for (int i = 0; i < 1024; i++) {
+        strcpy(entries[i].text, "\0");
+        entries[i].points = 0;
+    }
 }
 
 void savingText() {
@@ -483,7 +504,7 @@ void savingText() {
         }*/
         // Sort and save the new entry
         sort_and_write_scores("../output.txt", text, gameState.totalPoint);
-
+        printf("%s\n", text);
         DrawText("Saved!", screenWidth / 2 - 50, 340, 20, GREEN); // Feedback to user
     }
     DrawText("Enter a name: ", screenWidth / 2 - 130, 100, 40, GOLD);
@@ -496,31 +517,28 @@ void savingText() {
 }
 
 void sort_and_write_scores(const char* filename, const char* text, int points) {
-    
     int count = 0;
-
     // Read existing data
     FILE* file1 = fopen("../output.txt", "r");
     if (file != NULL) {
-        while (fscanf(file, "%[^0-9]%d\n", entries[count].text, &entries[count].points) == 2) {
+        while (fscanf(file, "%s %d\n", entries[count].text, &entries[count].points) == 2) {
             if (++count >= MAX_LINES) break;
+            printf("%s", entries[count].text);
         }
         fclose(file1);
     }
-
-    // Add new entry
+    
     strcpy(entries[count].text, text);
     entries[count].points = points;
     count++;
 
-    // Sort the array
     qsort(entries, count, sizeof(ScoreEntry), compare_scores);
 
-    // Write sorted data back to file
     file1 = fopen("../output.txt", "w");
     if (file1 != NULL) {
         for (int i = 0; i < count; i++) {
-            fprintf(file, "%s %d\n", entries[i].text, entries[i].points);
+            printf("%s", entries[i].text);
+            fprintf(file1, "%s %d\n", entries[i].text, entries[i].points);
         }
         fclose(file1);
     }
@@ -539,11 +557,15 @@ void print10() {
         return; // Exit if file opening fails
     }
 
-    for (size_t i = 0; i < 10; i++) {
-        if (fscanf(file3, "%29s %d", array[i], &point[i]) != 2) {
-            printf("Error reading line %zu\n", i + 1);
-            break; // Exit loop if there is a mismatch or not enough data
+    char line[31];
+    int i = 0;
+    while (fgets(line, sizeof(line), file3) && i < 10) {
+        // Attempt to parse the string and the integer from the line
+        if (sscanf(line, "%31[^\n0123456789] %d", array[i], &point[i]) != 2) {
+            printf("Error reading line %d\n", i + 1);
+            break; // Break if parsing fails
         }
+        i++;
     }
 
     fclose(file3); // Close the file after reading
@@ -554,14 +576,9 @@ void print10() {
 }
 
 void updateCombo(GameState* gameState) {
-    /*if (gameState->combo == 0) {
-        gameState->combo = 1;
-    }*/
     if (gameState->gameTime - gameState->lastMatchTime > 6.0) {
         gameState->combo = 1;
     }
-    //printf("%d\n", gameState->combo);
-    printf("combo:%d elapsedTime: %f\n", gameState->combo, gameState->gameTime - gameState->lastMatchTime);
 }
 
 void drawCombo() {
@@ -574,4 +591,9 @@ void drawCombo() {
         DrawRectangle(155, 20, width, 60, (Color) { 213, 194, 105, 255 });
         DrawTexture(symbolsTexture[1], 100, 10, RAYWHITE);
     }
+}
+
+void shake() {
+    shakeTime = 10;
+    
 }

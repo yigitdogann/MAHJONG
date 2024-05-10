@@ -36,7 +36,7 @@ typedef struct LastTwoClicked {
     tile* lastClicked;
 }LastTwoClicked;
 
-typedef enum screen { starting, game, gameOver, victory} screen;
+typedef enum screen { starting, game, gameOver, win} screen;
 
 typedef struct GameState {
     // Define game state variables
@@ -122,5 +122,9 @@ extern const int screenHeight;
 extern int framesCounter; // Useful to count frames
 extern FILE* file;
 extern node* head; //linked list head pointer 
+
+extern int shakeTime;
+extern float shakeMagnitude;
+extern Camera2D camera;
 
 #endif

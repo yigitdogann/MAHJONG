@@ -16,6 +16,8 @@ bool isClickable(tile*);
 // son tiklanilan 2 tas masadan kaldirilabilir mi? YES : NO
 bool isRemovable(LastTwoClicked);
 
+tile* getTopMostTile(tile, Vector2);
+
 void shuffleBasedOnCondition(int*, int*, int, int);
 
 void shuffle_all(LastTwoClicked*, int*, int*);
@@ -56,5 +58,7 @@ void print10();
 void updateCombo(GameState*);
 
 void drawCombo();
+
+void shake();
 
 #endif

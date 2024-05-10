@@ -16,17 +16,38 @@ tile* getTopMostTile(tile tiles[ARRAY_Y][ARRAY_X][LAYER], Vector2 mousePosition)
 void updateAndDraw();
 void updateGame(GameState*);
 
-Shader shader;
-
 int main(void) {
+    camera.target = (Vector2){ screenWidth / 2.0f, screenHeight / 2.0f };
+    camera.offset = (Vector2){ screenWidth / 2.0f, screenHeight / 2.0f };
+    camera.rotation = 0.0f;
+    camera.zoom = 1.0f;
+
+    // Used to control the duration and intensity of the shake
+
     InitWindow(screenWidth, screenHeight, "Mahjong Game");//pencere genislik X yukseklik, pencere adi 
-    Shader shader = LoadShader("../basic.vs", "../basic.fs");
     InitAudioDevice();
     SetTargetFPS(60);
     InitImagesSounds();
     //PlaySound(gameSound);
     
     while (!WindowShouldClose()){
+        //if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+        //{
+        //    shakeTime = 60; // Duration of shake in frames
+        //}
+
+        if (shakeTime > 0)
+        {
+            // Randomly adjust the camera's offset for shake effect
+            camera.offset.x = screenWidth / 2.0f + GetRandomValue(-shakeMagnitude, shakeMagnitude);
+            camera.offset.y = screenHeight / 2.0f + GetRandomValue(-shakeMagnitude, shakeMagnitude);
+            shakeTime--; // Decrease shake time
+        }
+        else
+        {
+            // Reset camera offset after shaking ends
+            camera.offset = (Vector2){ screenWidth / 2.0f, screenHeight / 2.0f };
+        }
         updateAndDraw();
     }
     unloadGameSounds();
@@ -38,6 +59,7 @@ int main(void) {
 
 void updateAndDraw() {
     BeginDrawing();
+    
     switch (gameState.gameScreen) {
     case starting:
         if (!gameState.isMapSelected) {
@@ -78,7 +100,7 @@ void updateAndDraw() {
         }
 
         break;
-    case victory:
+    case win:
         DrawTexture(backGroundTexture[3], 0, 0, WHITE);
         if (GuiButton((Rectangle) { 670, 610, 100, 30 }, "MAIN")) {
             resetGame();
@@ -98,7 +120,6 @@ void updateAndDraw() {
 
         break;
     }
-
     framesCounter++;
     EndDrawing();
 }
@@ -120,10 +141,14 @@ void updateGame(GameState* gameState) {
     if (GuiButton((Rectangle) { screenWidth / 2 + 500, screenHeight / 2 + 100, 100, 30 }, "HINT (SPACE)") || IsKeyPressed(KEY_SPACE)) {
         deletePointsforHint(gameState);
         PlaySound(gameButtonSound);
+        countMatchableTiles(gameState);
         resetHint(&hint);
         resetLastClicks(&LastClicks);
-        countMatchableTiles(gameState);
         giveHint(&hint, &LastClicks, clickable_freq);
+
+        if (gameState->matchable == 0) {
+            shakeTime = 10;
+        }
     }
     if (GuiButton((Rectangle) { screenWidth / 2 + 500, screenHeight / 2 + 175, 100, 30 }, "UNDO (CTRL)") || IsKeyPressed(KEY_LEFT_CONTROL)) {
         PlaySound(gameButtonSound);
@@ -147,30 +172,20 @@ void updateGame(GameState* gameState) {
     updateCombo(gameState);
 }
 
-tile* getTopMostTile(tile tiles[ARRAY_Y][ARRAY_X][LAYER], Vector2 mousePosition) {
-    for (int i = LAYER - 1; i >= 0; i--) {//ilk en yukaridaki layerlari kontrol et
-        for (int j = 0, a = 0; j < ARRAY_Y; j++) {
-            for (int k = 0; k < ARRAY_X; k++) {
-                if ((CheckCollisionPointRec(mousePosition, tiles[j][k][i].rectangle)) && tiles[j][k][i].isExists == true) { //3 boyutu da kontrol eder ve eger tas varsa, mousun ucundaki tasi bulur 
-                    return &tiles[j][k][i]; // pointera gonderir ileride kullanacagiz
-                }
-            }
-        }
-    }
-
-    return NULL;
-}
-
 void processClick(LastTwoClicked* hint, LastTwoClicked* LastClicks, Vector2 mousePosition, node** head) {
     tile* pointer = NULL;
     resetHint(hint);
     
     pointer = getTopMostTile(tiles, mousePosition);// imlec ile tiklanilan tasi point eder
     
+    if (pointer != NULL) {
+        if (pointer->isClickable == false)shakeTime = 10;
+    }
+
     //tiklanilabilir bir tas ise && son tiklanilan tasa bir kez daha tiklanmiyorsa LastClicked guncellenir
     if (isClickable(pointer) && LastClicks->lastClicked != pointer) {
         PlaySound(selectSound); //secilebilir bir tasa tikladigi icin selectSound sesi verildi
-
+        
         if (LastClicks->previousClicked != NULL) {//crash olmamasi icin eklendi, bos olan bir adresin degerini degistirmeye calisacakti, boylece program cokecekti 
             LastClicks->previousClicked->color = RAYWHITE;//eski onceki tiklanilani beyaz yapar (son 2yi kirmizi yapiyoruz o artik 3.)
         }        
@@ -191,6 +206,7 @@ void processClick(LastTwoClicked* hint, LastTwoClicked* LastClicks, Vector2 mous
             countMatchableTiles(&gameState);
         }
     }
+    
     //free(pointer);
     return;
 }
@@ -262,8 +278,8 @@ int giveHint(LastTwoClicked* hint, LastTwoClicked* LastClicks, int* clickable_fr
 
 void deleteBegin(node** head, int* isExist, LastTwoClicked* LastClicks) {
     if (*head == NULL) {//linked listten kaldirilacak oge yok, linked list zaten bos
-        // printf("Linked list is already empty\n");
-        return;
+            shakeTime = 10;
+            return;
     }
     node* tempNode = *head;
 
