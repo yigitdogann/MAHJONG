@@ -24,7 +24,7 @@ int main(void) {
     InitImages();
     InitSounds();
     InitCamera(&camera);
-    GuiSetStyle(DEFAULT, TEXT_SIZE, 20);
+    GuiSetStyle(DEFAULT, TEXT_SIZE, 17);
     while (!WindowShouldClose()){
         checkCameraForShake(&camera);
         updateAndDraw();
@@ -43,13 +43,14 @@ void updateAndDraw() {
     case starting:
         if (!gameState.isMapSelected) { // Check if the map isn't selected yet
             DrawTexture(backGroundTexture[0], 0, 0, WHITE); // Draw the main background texture
-            readFile(&gameState); // Read text files according to map selection
+            readFile(&gameState); // Read text files (MAPs) according to map selection
         }
         if (gameState.isMapSelected) { // If the map is selected
             DrawTexture(backGroundTexture[1], 0, 0, WHITE); // Draw the game background texture
             PlaySound(gameSound); // Play the background music for the game scene
+            SetSoundVolume(gameSound, 0.05); // Adjust the volume level of a specific sound 
             InitMap(); // Initialize tile coordinates from the 2D array to 3D array
-            setupTileIDs(tileIDs);
+            setupTileIDs(tileIDs); // Fill the array with numbers where each tile type repeats four times.
             shuffleTilesBasedOnState(tileIDs, isExist, ARRAY_SIZE, 0); // Shuffle tiles or elements based on specific conditions
             InitObjects(&LastClicks); // Initialize game objects from 3D array and ID.
             gameState.remainingTile = ARRAY_SIZE; // Set the initial number of remaining tiles to 144
@@ -93,27 +94,27 @@ void updateGame(GameState* gameState) {
         countMatchableTiles(gameState); // Recounts matchable tiles after shuffling
     }
     if (GuiButton((Rectangle) { screenWidth / 2 + 500, screenHeight / 2 + 100, 150, 50 }, "Hint (SPACE)") || IsKeyPressed(KEY_SPACE)) {
-        //deletePointsforHint(gameState); // Points penalty for hint, commented out perhaps for testing
-        PlaySound(gameButtonSound); // Plays a generic game button sound
+        /* deletePointsforHint(gameState); // Points penalty for hint, commented out perhaps for testing */
+        PlaySound(buttonSound1); // Plays a generic game button sound
         countMatchableTiles(gameState); // Ensures matchable tiles are counted before hint is given
         resetHint(&hint); // Resets hint data
         resetLastClicks(&LastClicks); // Resets the last clicks data
         giveHint(&hint, &LastClicks, clickableTilesPerType); // Provides a hint to the player
     }
     if (GuiButton((Rectangle) { screenWidth / 2 + 500, screenHeight / 2 + 175, 150, 50 }, "Undo (CTRL)") || IsKeyPressed(KEY_LEFT_CONTROL)) {
-        PlaySound(gameButtonSound); // Plays a generic game button sound
-        deleteBegin(&head, isExist, &LastClicks); // Undoes the last move
-        countMatchableTiles(gameState); // Updates matchable tiles after undoing
+        PlaySound(buttonSound1); // Plays a generic game button sound
+        deleteBegin(&head, isExist, &LastClicks); // Undo the last move
+        countMatchableTiles(gameState); // Updates matchable tiles after UNDO
         resetLastClicks(&LastClicks); // Resets the last clicks data
         gameState->combo = 1; // Resets combo multiplier
     }
     if (GuiButton((Rectangle) { screenWidth / 2 + 500, screenHeight / 2 + 250, 150, 50 }, "Main")) {
-        PlaySound(buttonSound); // Plays a sound for returning to the main menu
+        PlaySound(buttonSound2); // Plays a button sound
         resetGame(); // Resets the game and pointer values
         gameState->gameScreen = starting; // Changes the game screen to starting menu
     }
     if (GuiButton((Rectangle) { screenWidth / 2 + 500, screenHeight / 2 + 325, 150, 50 }, "End (X)", 40) || IsKeyPressed(KEY_X)) {
-        PlaySound(buttonSound); // Plays a button sound for game ending
+        PlaySound(buttonSound2); // Plays a button sound
         gameState->gameScreen = gameOver; // Sets the game screen to game over
     }
 
@@ -131,13 +132,13 @@ void processClick(LastTwoClicked* hint, LastTwoClicked* LastClicks, Vector2 mous
     pointer = getTopMostTile(tiles, mousePosition); // Points to the tile clicked by the cursor
 
     if (pointer != NULL) {
-        if (pointer->isClickable == false)
+        if (pointer->isClickable == false || gameState.matchable == 0)
             shakeTime = 10; // Triggers a shake effect if the tile is not clickable
     }
 
     // If the tile is clickable and is not the same as the last clicked tile, update LastClicked
     if (isClickable(pointer) && LastClicks->lastClicked != pointer) {
-        PlaySound(selectSound); // Plays a sound because a clickable tile was clicked
+        PlaySound(selectSound); // Plays a sound when a clickable tile was selected
 
         if (LastClicks->previousClicked != NULL) { // Prevents crash by not trying to modify a NULL address
             LastClicks->previousClicked->color = RAYWHITE; // Changes the color of the previously clicked tile to white

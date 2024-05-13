@@ -6,7 +6,7 @@ Texture2D symbolsTexture[8]; // Array for storing symbol textures used in the ga
 
 ScoreEntry entries[MAX_LINES]; // Array to store score entries for displaying or logging.
 char lines[MAX_LINES][MAX_LINE_LENGTH]; // Buffer for reading lines of text, typically from files.
-char text[256] = "\0"; // Buffer for temporary text storage, used in text input or display.
+char text[256] = "\0"; // Text storage, used in text input or display.
 bool saveText = false; // Flag to determine if text needs to be saved, used in text editing or submission.
 bool saveGuiVisible = true; // Flag to control visibility of the save GUI component.
 
@@ -17,10 +17,10 @@ int point[10]; // Array to store point values, possibly for scoring or indexing 
 int offset = 80; // Commonly used offset value for positioning elements in the UI.
 
 Sound gameSound; // Background game music.
-Sound buttonSound; // Sound played when buttons are clicked.
+Sound buttonSound2; // Sound played when buttons are clicked.
 Sound selectSound; // Sound for selecting options or tiles.
 Sound mapSelectionSound; // Sound specific to selecting maps in the game.
-Sound gameButtonSound; // General sound for game-related button interactions.
+Sound buttonSound1; // General sound for game-related button interactions.
 Sound shuffleSound; // Sound played when tiles or elements are shuffled.
 
 LastTwoClicked LastClicks; // Struct to keep track of the last two tiles clicked by the user.
@@ -34,7 +34,7 @@ int map[ARRAY_Y][ARRAY_X]; // 2D array representing the basic tile map or layout
 int newMap[ARRAY_Y][ARRAY_X][LAYER] = { 0 }; // 3D array for managing layered tile arrangements.
 
 int tileIDs[ARRAY_SIZE]; // Array of tile IDs, mapping to textures or types.
-int isExist[ARRAY_SIZE] = { 0 }; // Array tracking the existence state of tiles.
+int isExist[ARRAY_SIZE] = { 0 }; // Array tracking the existence state of tiles(If exist 1, else 0).
 int clickableTilesPerType[NUM_IMAGES]; // Array counting how many tiles of each type are clickable.
 
 const int screenWidth = 1440; // Fixed screen width for the game window.

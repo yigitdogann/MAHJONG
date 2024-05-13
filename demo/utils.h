@@ -75,7 +75,7 @@ void savingText();
 // Sort scores and write them to a file.
 void sort_and_write_scores(const char*, const char*, int);
 
-// Compare two scores to determine their order.
+// Compare two scores to determine their order. (used in qsort)
 int compare_scores(const void*, const void*);
 
 // Display the top 10 scores on the screen.

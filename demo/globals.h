@@ -29,7 +29,7 @@ typedef struct tile {
     Texture2D texture;   // Texture of the tile.
     Color color;         // Color of the tile for additional graphical effects.
     int x, y, z;         // Position of the tile in the grid and layer.
-    int combo;           // Combo multiplier associated with this tile.
+    int combo;           // Combo multiplier saves the combo value when the tiles are matched.
 } tile;
 
 // Structure to manage the last two clicked tiles in the game.
@@ -47,7 +47,7 @@ typedef struct GameState {
     bool isMapSelected;    // Flag to check if a map has been selected.
 
     int remainingTile;     // Counter for the remaining tiles.
-    int totalPoint;        // Accumulated points in the game.
+    int totalPoint;        // Total points in the game.
     int combo;             // Current combo multiplier.
     int matchable;         // Number of matchable tile pairs available.
 
@@ -58,7 +58,7 @@ typedef struct GameState {
 
     double startTime;      // Record of game start time.
     double gameTime;       // Running total of game time elapsed.
-    double lastMatchTime;  // Time of the last match made.
+    double lastMatchTime;  // Time of the last match made. (will use in combo mechanics)
     double lastUndoTime;   // Time when the last undo operation was performed.
 } GameState;
 
@@ -93,10 +93,10 @@ extern int point[10];      // Array to store integers
 extern int offset;
 
 extern Sound gameSound;
-extern Sound buttonSound;
+extern Sound buttonSound2;
 extern Sound selectSound;
 extern Sound mapSelectionSound;
-extern Sound gameButtonSound;
+extern Sound buttonSound1;
 extern Sound shuffleSound;
 
 extern LastTwoClicked LastClicks;

@@ -34,7 +34,7 @@ void InitSounds() {
     gameSound = LoadSound("../assets/sounds/soundtrack.mp3");  
     
     // Load the sound effect for button clicks, providing auditory feedback during user interactions.
-    buttonSound = LoadSound("../assets/sounds/PixbuttonSound.wav");  
+    buttonSound2 = LoadSound("../assets/sounds/PixbuttonSound.wav");  
 
     // Load the sound effect for selecting tiles or options within the game, enhancing the interactive experience.
     selectSound = LoadSound("../assets/sounds/selectSound.mp3");  
@@ -43,7 +43,7 @@ void InitSounds() {
     mapSelectionSound = LoadSound("../assets/sounds/mapSelectionSound.mp3");
     
     // Load the sound effect for pressing game-related buttons, such as during gameplay or on game-specific menus.
-    gameButtonSound = LoadSound("../assets/sounds/gameButtonSound.mp3"); 
+    buttonSound1 = LoadSound("../assets/sounds/gameButtonSound.mp3"); 
 
     // Load the sound effect for shuffling tiles or elements within the game, used to signify a major change or action.
     shuffleSound = LoadSound("../assets/sounds/shuffleSound.wav");
@@ -51,7 +51,7 @@ void InitSounds() {
 
 void readFile(GameState* gameState) {
     // Button for selecting the "Easy" difficulty map
-    if (GuiButton((Rectangle) { screenWidth / 2 - 45, screenHeight / 2 - 100, 100, 30 }, "Easy")) {
+    if (GuiButton((Rectangle) { screenWidth / 2 - 45, screenHeight / 2 - 80, 100, 30 }, "Easy")) {
         PlaySound(mapSelectionSound); // Play a sound indicating a map has been selected
         file = fopen("../assets/maps/map2.txt", "r"); // Attempt to open the map file for "Easy" difficulty
         if (file == NULL) { // Check if the file failed to open
@@ -61,7 +61,7 @@ void readFile(GameState* gameState) {
         gameState->isMapSelected = true; // Set the flag indicating that a map has been selected
     }
     // Button for selecting the "Normal" difficulty map
-    else if (GuiButton((Rectangle) { screenWidth / 2 - 45, screenHeight / 2 - 50, 100, 30 }, "Normal")) {
+    else if (GuiButton((Rectangle) { screenWidth / 2 - 45, screenHeight / 2 - 30, 100, 30 }, "Normal")) {
         PlaySound(mapSelectionSound); // Play a sound indicating a map has been selected
         file = fopen("../assets/maps/map3.txt", "r"); // Attempt to open the map file for "Normal" difficulty
         if (file == NULL) { // Check if the file failed to open
@@ -71,7 +71,7 @@ void readFile(GameState* gameState) {
         gameState->isMapSelected = true; // Set the flag indicating that a map has been selected
     }
     // Button for selecting the "Expert" difficulty map
-    else if (GuiButton((Rectangle) { screenWidth / 2 - 45, screenHeight / 2, 100, 30 }, "Expert")) {
+    else if (GuiButton((Rectangle) { screenWidth / 2 - 45, screenHeight / 2 + 20, 100, 30 }, "Expert")) {
         PlaySound(mapSelectionSound); // Play a sound indicating a map has been selected
         file = fopen("../assets/maps/map1.txt", "r"); // Attempt to open the map file for "Expert" difficulty
         if (file == NULL) { // Check if the file failed to open
@@ -116,38 +116,48 @@ void InitMap() {
 }
 
 void InitObjects() {
+    // Loop through each layer, row, and column to initialize tiles.
     for (int i = 0, a = 0; i < LAYER; i++) {
         for (int j = 0; j < ARRAY_Y; j++) {
             for (int k = 0; k < ARRAY_X; k++) {
-                tiles[j][k][i].y = j; // ileride 2 tasi kiyaslarken kullanilacak // save the x, y, z values of every tile
-                tiles[j][k][i].x = k;
-                tiles[j][k][i].z = i;
+                // Assign coordinates within the game grid to each tile.
+                tiles[j][k][i].y = j; // Vertical position in the grid.
+                tiles[j][k][i].x = k; // Horizontal position in the grid.
+                tiles[j][k][i].z = i; // Depth position in the grid.
 
-                tiles[j][k][i].isExists = newMap[j][k][i]; // 3 boyutlu arrayde deger 1 ise oraya tas cizecegiz //if the value is 1 in 3D array, draw a tile there
+                // Set tile existence based on the map data (1 means it exists).
+                tiles[j][k][i].isExists = newMap[j][k][i];
 
-                tiles[j][k][i].rectangle.x = (float)(k * WIDTH / 2 - i * 10); //taslarin x ve y degerleri girildi, i ile carpim 3 boyun goruntusu kazandirmak icin eklendi
+                // Calculate the display position of the tile, adjusting for depth to create a 3D effect.
+                tiles[j][k][i].rectangle.x = (float)(k * WIDTH / 2 - i * 10);
                 tiles[j][k][i].rectangle.y = (float)(j * HEIGHT / 2 - i * 10 + offset);
 
-                tiles[j][k][i].rectangle.width = (float)WIDTH; //tasin yuksekligi //width of tiles
-                tiles[j][k][i].rectangle.height = (float)HEIGHT;// tasin uzunlugu //height of tiles
-                if (tiles[j][k][i].isExists == true) {//eger tas var ise //check if there's a tile in that coordinates
-                    tiles[j][k][i].color = RAYWHITE;//tasi normal renk tonunda ciz // set the color of tiles to white
-                    tiles[j][k][i].id = tileIDs[a]; //taslar karistirildi ve cizilmesi gerekenlere sirayla atanacak //tiles shuffled for placing to table
-                    tiles[j][k][i].texture = textures[tileIDs[a]];
-                    tiles[j][k][i].order = a;
+                // Set the dimensions of the tile.
+                tiles[j][k][i].rectangle.width = (float)WIDTH; // Tile width.
+                tiles[j][k][i].rectangle.height = (float)HEIGHT; // Tile height.
+
+                // Check if the tile should be drawn.
+                if (tiles[j][k][i].isExists == true) {
+                    tiles[j][k][i].color = RAYWHITE; // Initial color of the tile.
+                    tiles[j][k][i].id = tileIDs[a]; // Assign an ID from a shuffled list for variety.
+                    tiles[j][k][i].texture = textures[tileIDs[a]]; // Assign texture based on tile ID.
+                    tiles[j][k][i].order = a; // Record the order of tile placement for reference.
+
+                    // Assign points based on the color
                     if (tileIDs[a] >= 14 && tileIDs[a] <= 19) {
-                        tiles[j][k][i].point = 20;
+                        tiles[j][k][i].point = 20; // 20 points for gold tiles.
                     }
                     else {
-                        tiles[j][k][i].point = 10;
+                        tiles[j][k][i].point = 10; // 10 points for silver tiles.
                     }
-                    isExist[a]++;
-                    a++;
+                    isExist[a]++; // Increment existence count for each tile ID.
+                    a++; // Increase the counter by 1.
                 }
             }
         }
     }
 }
+
 
 bool isClickable(tile* getTopMostTile) {
     // Check if the tile is not empty and does exist.
@@ -339,7 +349,7 @@ void resetLastClicks(LastTwoClicked* LastClicks) {
 void unloadGameSounds() {
     UnloadSound(gameSound);// Remove the game background music from memory to free up resources.
     
-    UnloadSound(buttonSound);// Remove the sound effect used for button clicks to free up resources.
+    UnloadSound(buttonSound2);// Remove the sound effect used for button clicks to free up resources.
 
     UnloadSound(selectSound); // Remove the sound effect used for selecting items to free up resources.
 }
@@ -431,11 +441,12 @@ void isGameOver(GameState* gameState) {
         gameState->gameScreen = win; // Change the game screen to the win screen.
     }
     // Check if the total time has exceeded 5 minutes (300 seconds), indicating game over due to timeout.
-    else if (minutes * 60 + seconds > 300) {
+    else if (minutes * 60 + seconds <= 0) {
         gameState->isMapSelected = false; // Indicate that no map is currently selected.
         gameState->isGameActive = false; // Indicate that the game is no longer active.
         gameState->gameScreen = gameOver; // Change the game screen to the game over screen.
     }
+    printf("%d %d\n", minutes, seconds);
 }
 
 
@@ -663,7 +674,7 @@ void endScreen() {
     // Check if the 'Main' button is clicked to return to the main game screen.
     if (GuiButton((Rectangle) { 670, 400, 100, 30 }, "Main")) {
         resetGame(); // Reset the game to initial state for a new session.
-        PlaySound(buttonSound); // Play a sound to confirm button press.
+        PlaySound(buttonSound2); // Play a sound to confirm button press.
         gameState.gameScreen = starting; // Change the screen to the starting menu.
     }
 
