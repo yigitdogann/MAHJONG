@@ -43,15 +43,15 @@ void updateAndDraw() {
     case starting:
         if (!gameState.isMapSelected) { // Check if the map isn't selected yet
             DrawTexture(backGroundTexture[0], 0, 0, WHITE); // Draw the main background texture
-            readFile(&gameState); // Read text files and upload their contents to a 3D array
+            readFile(&gameState); // Read text files according to map selection
         }
         if (gameState.isMapSelected) { // If the map is selected
             DrawTexture(backGroundTexture[1], 0, 0, WHITE); // Draw the game background texture
             PlaySound(gameSound); // Play the background music for the game scene
-            InitMap(); // Initialize tile coordinates from the 3D array
+            InitMap(); // Initialize tile coordinates from the 2D array to 3D array
             setupTileIDs(tileIDs);
             shuffleTilesBasedOnState(tileIDs, isExist, ARRAY_SIZE, 0); // Shuffle tiles or elements based on specific conditions
-            InitObjects(&LastClicks); // Initialize tile game objects(tiles)
+            InitObjects(&LastClicks); // Initialize game objects from 3D array and ID.
             gameState.remainingTile = ARRAY_SIZE; // Set the initial number of remaining tiles to 144
             gameState.startTime = GetTime(); // Record the start time of the game
             gameState.gameScreen = game; // Switch the game state to the main gameplay state

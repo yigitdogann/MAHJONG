@@ -26,18 +26,16 @@ Sound shuffleSound; // Sound played when tiles or elements are shuffled.
 LastTwoClicked LastClicks; // Struct to keep track of the last two tiles clicked by the user.
 LastTwoClicked hint; // Struct to store hint information related to tile selection.
 
+tile tiles[ARRAY_Y][ARRAY_X][LAYER]; // 3D array of tile structures for the game board.
+Vector2 mousePosition; // Structure to hold the current mouse position, used in click detection.
+GameState gameState = { 0 }; // Struct to hold various states and statuses of the game.
+
 int map[ARRAY_Y][ARRAY_X]; // 2D array representing the basic tile map or layout.
 int newMap[ARRAY_Y][ARRAY_X][LAYER] = { 0 }; // 3D array for managing layered tile arrangements.
 
 int tileIDs[ARRAY_SIZE]; // Array of tile IDs, mapping to textures or types.
 int isExist[ARRAY_SIZE] = { 0 }; // Array tracking the existence state of tiles.
 int clickableTilesPerType[NUM_IMAGES]; // Array counting how many tiles of each type are clickable.
-
-tile tiles[ARRAY_Y][ARRAY_X][LAYER]; // 3D array of tile structures for the game board.
-int values[ARRAY_Y][ARRAY_X]; // Array for additional data values associated with tiles, possibly for scoring or states.
-
-Vector2 mousePosition; // Structure to hold the current mouse position, used in click detection.
-GameState gameState = { 0 }; // Struct to hold various states and statuses of the game.
 
 const int screenWidth = 1440; // Fixed screen width for the game window.
 const int screenHeight = 900; // Fixed screen height for the game window.
