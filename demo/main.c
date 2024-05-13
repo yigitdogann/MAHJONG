@@ -168,7 +168,6 @@ void processClick(LastTwoClicked* hint, LastTwoClicked* LastClicks, Vector2 mous
     return;
 }
 
-
 void addBegin(node** head, LastTwoClicked* LastClicks, int* isExist) {
     node* newNode = (node*)malloc(sizeof(node)); // Allocate memory for a new node
     if (newNode == NULL) { // Check if memory allocation failed
