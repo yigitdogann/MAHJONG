@@ -1,119 +1,111 @@
 ﻿#include "utils.h"
 
-void InitImagesSounds() {
-    backGround[1] = LoadImage("../assets/backgrounds/bg-black.png"); //arkaplan ekleme 
-    backGroundTexture[1] = LoadTextureFromImage(backGround[1]);
-    UnloadImage(backGround[1]);
+void InitImages() {
+    // Load background textures
+    backGroundTexture[0] = LoadTexture("../assets/backgrounds/background2.png"); // Load main background image
+    backGroundTexture[1] = LoadTexture("../assets/backgrounds/bg-black.png"); // Load game background image
+    backGroundTexture[2] = LoadTexture("../assets/backgrounds/gameOver.png"); // Load game over background image
+    backGroundTexture[3] = LoadTexture("../assets/backgrounds/victory.png"); // Load victory background image
 
-    backGround[0] = LoadImage("../assets/backgrounds/background2.png"); //arkaplan ekleme 
-    backGroundTexture[0] = LoadTextureFromImage(backGround[0]);
-    UnloadImage(backGround[0]);
-    
-    backGround[2] = LoadImage("../assets/backgrounds/gameOver.png"); //arkaplan ekleme 
-    backGroundTexture[2] = LoadTextureFromImage(backGround[2]);
-    UnloadImage(backGround[2]);
+    // Load symbol textures
+    symbolsTexture[0] = LoadTexture("../assets/symbols/2x.png"); // Load 2x combo multiplier symbol
+    symbolsTexture[1] = LoadTexture("../assets/symbols/3x.png"); // Load 3x combo multiplier symbol
+    symbolsTexture[2] = LoadTexture("../assets/symbols/heart.png"); // Load symbol representing remaining tiles
+    symbolsTexture[3] = LoadTexture("../assets/symbols/hourglass.png"); // Load hourglass symbol for time tracking
+    symbolsTexture[4] = LoadTexture("../assets/symbols/removable.png"); // Load symbol for removable tiles
+    symbolsTexture[5] = LoadTexture("../assets/symbols/trophy.png"); // Load symbol for score display
+    symbolsTexture[6] = LoadTexture("../assets/symbols/highScore.png"); // Load symbol for displaying the high score list
+    symbolsTexture[7] = LoadTexture("../assets/symbols/newRecord.png"); // Load symbol indicating a new record
 
-    backGround[3] = LoadImage("../assets/backgrounds/victory.png"); //arkaplan ekleme 
-    backGroundTexture[3] = LoadTextureFromImage(backGround[3]);
-    UnloadImage(backGround[3]);
+    // Set initial combo multiplier
+    gameState.combo = 1; // Initialize combo multiplier to 1
 
-    symbols[0] = LoadImage("../assets/symbols/2x.png"); //arkaplan ekleme 
-    symbolsTexture[0] = LoadTextureFromImage(symbols[0]);
-    UnloadImage(symbols[0]);
-
-    symbols[1] = LoadImage("../assets/symbols/3x.png"); //arkaplan ekleme 
-    symbolsTexture[1] = LoadTextureFromImage(symbols[1]);
-    UnloadImage(symbols[1]);
-
-    symbols[2] = LoadImage("../assets/symbols/heart.png"); //arkaplan ekleme 
-    symbolsTexture[2] = LoadTextureFromImage(symbols[2]);
-    UnloadImage(symbols[2]);
-
-    symbols[3] = LoadImage("../assets/symbols/hourglass.png"); //arkaplan ekleme 
-    symbolsTexture[3] = LoadTextureFromImage(symbols[3]);
-    UnloadImage(symbols[3]);
-    
-    symbols[4] = LoadImage("../assets/symbols/removable.png"); //arkaplan ekleme 
-    symbolsTexture[4] = LoadTextureFromImage(symbols[4]);
-    UnloadImage(symbols[4]);
-
-    symbols[5] = LoadImage("../assets/symbols/trophy.png"); //arkaplan ekleme 
-    symbolsTexture[5] = LoadTextureFromImage(symbols[5]);
-    UnloadImage(symbols[5]);
-
-    symbols[6] = LoadImage("../assets/symbols/highScore.png"); //arkaplan ekleme 
-    symbolsTexture[6] = LoadTextureFromImage(symbols[6]);
-    UnloadImage(symbols[6]);
-    
-    symbols[7] = LoadImage("../assets/symbols/newRecord.png"); //arkaplan ekleme 
-    symbolsTexture[7] = LoadTextureFromImage(symbols[7]);
-    UnloadImage(symbols[7]);
-
-    gameSound = LoadSound("../assets/sounds/soundtrack.mp3");
-    buttonSound = LoadSound("../assets/sounds/PixbuttonSound.wav");
-    selectSound = LoadSound("../assets/sounds/selectSound.mp3");
-    mapSelectionSound = LoadSound("../assets/sounds/mapSelectionSound.mp3");
-    gameButtonSound = LoadSound("../assets/sounds/gameButtonSound.mp3");
-    shuffleSound = LoadSound("../assets/sounds/shuffleSound.wav");
-    (&gameState)->combo = 1;
-    //UnloadSound(gameSound);     // Unload sound data
+    // Load tile textures dynamically based on their index
     for (int i = 0; i < NUM_IMAGES; i++) {
-        char filePath[NUM_IMAGES]; // Buffer to hold the file path
-        sprintf(filePath, "../assets/tiles/%d.png", i); // Create file path, note images are 1-indexed in your folder
+        char filePath[NUM_IMAGES]; // Declare a buffer to hold the file path
+        sprintf(filePath, "../assets/tiles/%d.png", i); // Format file path string for each tile texture
 
-        images[i] = LoadImage(filePath); // Load image data into CPU memory (RAM)
-        textures[i] = LoadTextureFromImage(images[i]); // Image converted to texture, GPU memory (RAM -> VRAM)
-        UnloadImage(images[i]); // Unload image data from CPU memory (RAM)
+        textures[i] = LoadTexture(filePath); // Load each tile texture based on its file path
     }
 }
+
+void InitSounds() {
+    // Load the main game soundtrack to be used as background music throughout the game.
+    gameSound = LoadSound("../assets/sounds/soundtrack.mp3");  
+    
+    // Load the sound effect for button clicks, providing auditory feedback during user interactions.
+    buttonSound = LoadSound("../assets/sounds/PixbuttonSound.wav");  
+
+    // Load the sound effect for selecting tiles or options within the game, enhancing the interactive experience.
+    selectSound = LoadSound("../assets/sounds/selectSound.mp3");  
+
+    // Load the sound effect specifically for map selections, used to highlight this action in the game settings or menu.
+    mapSelectionSound = LoadSound("../assets/sounds/mapSelectionSound.mp3");
+    
+    // Load the sound effect for pressing game-related buttons, such as during gameplay or on game-specific menus.
+    gameButtonSound = LoadSound("../assets/sounds/gameButtonSound.mp3"); 
+
+    // Load the sound effect for shuffling tiles or elements within the game, used to signify a major change or action.
+    shuffleSound = LoadSound("../assets/sounds/shuffleSound.wav");
+}
+
 void readFile(GameState* gameState) {
-    if (GuiButton((Rectangle) { screenWidth / 2 - 45, screenHeight / 2 - 100, 100, 30 }, "EASY")) {
-        PlaySound(mapSelectionSound);
-        file = fopen("../assets/maps/map2.txt", "r"); //dosyayi oku 
-        if (file == NULL) { //dosyayi okumazsan konsola error ver
-            perror("Failed to open file");
+    // Button for selecting the "Easy" difficulty map
+    if (GuiButton((Rectangle) { screenWidth / 2 - 45, screenHeight / 2 - 100, 100, 30 }, "Easy")) {
+        PlaySound(mapSelectionSound); // Play a sound indicating a map has been selected
+        file = fopen("../assets/maps/map2.txt", "r"); // Attempt to open the map file for "Easy" difficulty
+        if (file == NULL) { // Check if the file failed to open
+            perror("Failed to open file"); // Print an error message to the console
             return;
         }
-        gameState->isMapSelected = true;
+        gameState->isMapSelected = true; // Set the flag indicating that a map has been selected
     }
-    else if (GuiButton((Rectangle) { screenWidth / 2 - 45, screenHeight / 2 - 50, 100, 30 }, "NORMAL")) {
-        PlaySound(mapSelectionSound);
-        file = fopen("../assets/maps/map3.txt", "r"); //dosyayi oku 
-        if (file == NULL) { //dosyayi okumazsan konsola error ver
-            perror("Failed to open file");
+    // Button for selecting the "Normal" difficulty map
+    else if (GuiButton((Rectangle) { screenWidth / 2 - 45, screenHeight / 2 - 50, 100, 30 }, "Normal")) {
+        PlaySound(mapSelectionSound); // Play a sound indicating a map has been selected
+        file = fopen("../assets/maps/map3.txt", "r"); // Attempt to open the map file for "Normal" difficulty
+        if (file == NULL) { // Check if the file failed to open
+            perror("Failed to open file"); // Print an error message to the console
             return;
         }
-        gameState->isMapSelected = true;
+        gameState->isMapSelected = true; // Set the flag indicating that a map has been selected
     }
-    else if (GuiButton((Rectangle) { screenWidth / 2 - 45, screenHeight / 2, 100, 30 }, "EXPERT")) {
-        PlaySound(mapSelectionSound);
-        file = fopen("../assets/maps/map1.txt", "r"); //dosyayi oku 
-        if (file == NULL) { //dosyayi okumazsan konsola error ver
-            perror("Failed to open file");
+    // Button for selecting the "Expert" difficulty map
+    else if (GuiButton((Rectangle) { screenWidth / 2 - 45, screenHeight / 2, 100, 30 }, "Expert")) {
+        PlaySound(mapSelectionSound); // Play a sound indicating a map has been selected
+        file = fopen("../assets/maps/map1.txt", "r"); // Attempt to open the map file for "Expert" difficulty
+        if (file == NULL) { // Check if the file failed to open
+            perror("Failed to open file"); // Print an error message to the console
             return;
         }
-        gameState->isMapSelected = true;
+        gameState->isMapSelected = true; // Set the flag indicating that a map has been selected
     }
 }
 void InitMap() {
     int x, y;
-    // Reading the file into a 2D array
+    // Reading the file into a 2D array to set up the game map
     for (y = 0; y < ARRAY_Y; y++) {
         for (x = 0; x < ARRAY_X; x++) {
+            // Read each digit from the file; expect a single digit (0-9) per map position
             if (fscanf(file, "%1d", &map[y][x]) == NULL) {
-                perror("Failed to read data");
-                return;
+                perror("Failed to read data"); // If reading fails, output an error message
+                return; // Exit the function on failure
             }
         }
     }
-    fclose(file);  // Always close the file after you're done reading
-     //free(file);
-    for (int k = LAYER - 1; k > 0; k--) { //mapi okumak icin once en ust kati oku
-        for (int i = 0; i < HEIGHT - 1; i++) { //arrayin dikey degerlerini oku
-            for (int j = 0; j < WIDTH - 1; j++) { //arrayin yatay degerlerini oku 
-                if ((map[i][j] == k) && (map[i][j + 1] == k) && (map[i + 1][j] == k) && (map[i + 1][j + 1] == k)) { //her 2x2 birim ayni degerde ise = 1 tas
-                    newMap[i][j][k]++;
-                    map[i][j]--; //sonra 1 azalt okdudugun degerleri alt kata gec 
+    fclose(file);  // Close the file after reading to free system resources and avoid data corruption
+
+    // Process the map data to initialize gameplay elements
+    for (int k = LAYER - 1; k > 0; k--) { // Start reading from the top layer down to create a layered effect
+        for (int i = 0; i < HEIGHT - 1; i++) { // Iterate over the height of the map grid
+            for (int j = 0; j < WIDTH - 1; j++) { // Iterate over the width of the map grid
+                // Check a 2x2 block in the grid for matching layer numbers
+                if ((map[i][j] == k) && (map[i][j + 1] == k) &&
+                    (map[i + 1][j] == k) && (map[i + 1][j + 1] == k)) { // If all four corners of a 2x2 block match the layer number
+
+                    newMap[i][j][k]++; // Increment the tile count at this position for the layer
+                    // Decrease the layer number of each part of this 2x2 block, effectively "consuming" it to create a tile
+                    map[i][j]--;
                     map[i][j + 1]--;
                     map[i + 1][j]--;
                     map[i + 1][j + 1]--;
@@ -122,36 +114,28 @@ void InitMap() {
         }
     }
 }
-void InitObjects(LastTwoClicked* LastClicks) {
-    LastClicks->lastClicked = NULL;
-    LastClicks->previousClicked = NULL;
 
-    for (int i = 0; i < ARRAY_SIZE; i++) {
-        isExist[i] = 0;
-    }
-    randomFiller(original);
-    shuffleBasedOnCondition(original, isExist, ARRAY_SIZE, 0);
-
+void InitObjects() {
     for (int i = 0, a = 0; i < LAYER; i++) {
         for (int j = 0; j < ARRAY_Y; j++) {
             for (int k = 0; k < ARRAY_X; k++) {
-                tiles[j][k][i].y = j; // ileride 2 tasi kiyaslarken kullanilacak 
+                tiles[j][k][i].y = j; // ileride 2 tasi kiyaslarken kullanilacak // save the x, y, z values of every tile
                 tiles[j][k][i].x = k;
                 tiles[j][k][i].z = i;
 
-                tiles[j][k][i].isExists = newMap[j][k][i]; // 3 boyutlu arrayde deger 1 ise oraya tas cizecegiz
+                tiles[j][k][i].isExists = newMap[j][k][i]; // 3 boyutlu arrayde deger 1 ise oraya tas cizecegiz //if the value is 1 in 3D array, draw a tile there
 
                 tiles[j][k][i].rectangle.x = (float)(k * WIDTH / 2 - i * 10); //taslarin x ve y degerleri girildi, i ile carpim 3 boyun goruntusu kazandirmak icin eklendi
                 tiles[j][k][i].rectangle.y = (float)(j * HEIGHT / 2 - i * 10 + offset);
 
-                tiles[j][k][i].rectangle.width = (float)WIDTH; //tasin yuksekligi
-                tiles[j][k][i].rectangle.height = (float)HEIGHT;// tasin uzunlugu
-                if (tiles[j][k][i].isExists == true) {// eger tas var ise
-                    tiles[j][k][i].color = RAYWHITE;//tasi normal renk tonunda ciz, (farkli renk koyup degisiklikler gozlenebilir)
-                    tiles[j][k][i].id = original[a]; //taslari karistirildi ve cizilmesi gerekenlere sirayla atanacak
-                    tiles[j][k][i].texture = textures[original[a]];
+                tiles[j][k][i].rectangle.width = (float)WIDTH; //tasin yuksekligi //width of tiles
+                tiles[j][k][i].rectangle.height = (float)HEIGHT;// tasin uzunlugu //height of tiles
+                if (tiles[j][k][i].isExists == true) {//eger tas var ise //check if there's a tile in that coordinates
+                    tiles[j][k][i].color = RAYWHITE;//tasi normal renk tonunda ciz // set the color of tiles to white
+                    tiles[j][k][i].id = tileIDs[a]; //taslar karistirildi ve cizilmesi gerekenlere sirayla atanacak //tiles shuffled for placing to table
+                    tiles[j][k][i].texture = textures[tileIDs[a]];
                     tiles[j][k][i].order = a;
-                    if (original[a] >= 14 && original[a] <= 19) {
+                    if (tileIDs[a] >= 14 && tileIDs[a] <= 19) {
                         tiles[j][k][i].point = 20;
                     }
                     else {
@@ -166,298 +150,331 @@ void InitObjects(LastTwoClicked* LastClicks) {
 }
 
 bool isClickable(tile* getTopMostTile) {
-    if (getTopMostTile == NULL) {
+    // Check if the tile is not empty and does exist.
+    if (getTopMostTile == NULL || getTopMostTile->isExists == false) {
         return false;
     }
-    if (getTopMostTile->isExists != true) {
-        return false;
-    }
+
+    // Coordinates of the tile.
     int x = getTopMostTile->x;
     int y = getTopMostTile->y;
     int z = getTopMostTile->z;
 
-    if (tiles[y][x + 1][z + 1].isExists == true) {//tasin yarim sagi ve dolu mu? doluysa tiklanilamaz
+    // Check for obstructing tiles in the immediate vicinity and above.
+    if (tiles[y][x + 1][z + 1].isExists) { // Check if the tile half to the right and one layer up exists.
         return false;
     }
-    if (tiles[y + 1][x + 1][z + 1].isExists == true) {//tasin yarim sag ustu dolu mu? doluysa tiklanilamaz
+    if (tiles[y + 1][x + 1][z + 1].isExists) { // Check if the tile half down and half to the right, one layer up, exists.
         return false;
     }
-    if (tiles[y][x][z + 1].isExists == true) {
+    if (tiles[y][x][z + 1].isExists) { // Check if the tile directly one layer above exists.
         return false;
     }
-    if (tiles[y + 1][x][z + 1].isExists == true) {
+    if (tiles[y + 1][x][z + 1].isExists) { // Check if the tile half down, one layer up, exists.
         return false;
     }
-    if (tiles[y - 1][x - 1][z + 1].isExists == true) {
+    if (tiles[y - 1][x - 1][z + 1].isExists) { // Check if the tile half up and half to the left, one layer up, exists.
         return false;
     }
-    if (tiles[y + 1][x - 1][z + 1].isExists == true) {
+    if (tiles[y + 1][x - 1][z + 1].isExists) { // Check if the tile half down and half to the left, one layer up, exists.
         return false;
     }
-    if (tiles[y - 1][x + 1][z + 1].isExists == true) {
+    if (tiles[y - 1][x + 1][z + 1].isExists) { // Check if the tile half up and half to the right, one layer up, exists.
         return false;
     }
-    if (tiles[y - 1][x][z + 1].isExists == true) {
+    if (tiles[y - 1][x][z + 1].isExists) { // Check if the tile half up, one layer above, exists.
         return false;
     }
-    if (tiles[y][x - 1][z + 1].isExists == true) {
+    if (tiles[y][x - 1][z + 1].isExists) { // Check if the tile half to the left, one layer up, exists.
         return false;
     }
-    bool right = tiles[y - 1][x + 2][z].isExists || tiles[y][x + 2][z].isExists || tiles[y + 1][x + 2][z].isExists;
-    //üst kat
 
-    bool left = tiles[y - 1][x - 2][z].isExists || tiles[y][x - 2][z].isExists || tiles[y + 1][x - 2][z].isExists;
-    //alt kat
+    // Check for tiles on the right and left that may block side movement.
+    bool rightBlocked = tiles[y - 1][x + 2][z].isExists || tiles[y][x + 2][z].isExists || tiles[y + 1][x + 2][z].isExists;
+    bool leftBlocked = tiles[y - 1][x - 2][z].isExists || tiles[y][x - 2][z].isExists || tiles[y + 1][x - 2][z].isExists;
 
-    if (right && left) {
+    // Determine clickability based on side blockages.
+    if (rightBlocked && leftBlocked) {
         return false;
     }
+
+    // If no obstructing conditions are met, the tile is clickable.
     return true;
 }
 
-bool isRemovable(LastTwoClicked LastClicks) {//son tiklanilan 2 tasi parametre olarak alir
+bool isRemovable(LastTwoClicked LastClicks) {
+    // Receives the last two clicked tiles as parameters.
     tile* tile1 = LastClicks.lastClicked;
     tile* tile2 = LastClicks.previousClicked;
-    
-    if (tile1 == NULL || tile2 == NULL) {//son tiklanilan 2 tastan bir tanesi NULL ise false doner, program crash olmamasi icin 
+
+    // Return false if either of the last two clicked tiles is NULL, to prevent the program from crashing.
+    if (tile1 == NULL || tile2 == NULL) {
         return false;
     }
-    if (tile1->id != tile2->id) {//eger taslarin simgeleri ayni degilse bunlar masadan kaldirilamaz
+    // If the tiles' identifiers do not match, they cannot be removed together.
+    if (tile1->id != tile2->id) {
         return false;
     }
-    //eger ayni tasa 2 kere cift tiklarsan masadan kalkmamasi icin 
+    // Prevent the same tile from being removed if it was clicked twice.
     if ((tile1->x == tile2->x) && (tile1->y == tile2->y) && (tile1->z == tile2->z)) {
         return false;
     }
 
-    tile1 = NULL;
-    tile2 = NULL;
-
-    return true;
-    
+    return true; // Return true if none of the above conditions are met, indicating the tiles can be removed.
 }
 
+
 tile* getTopMostTile(tile tiles[ARRAY_Y][ARRAY_X][LAYER], Vector2 mousePosition) {
-    for (int i = LAYER - 1; i >= 0; i--) {//ilk en yukaridaki layerlari kontrol et
-        for (int j = 0, a = 0; j < ARRAY_Y; j++) {
+    // Iterate from the topmost layer down to the bottom layer.
+    for (int i = LAYER - 1; i >= 0; i--) {
+        for (int j = 0; j < ARRAY_Y; j++) {
             for (int k = 0; k < ARRAY_X; k++) {
-                if ((CheckCollisionPointRec(mousePosition, tiles[j][k][i].rectangle)) && tiles[j][k][i].isExists == true) { //3 boyutu da kontrol eder ve eger tas varsa, mousun ucundaki tasi bulur 
-                    return &tiles[j][k][i]; // pointera gonderir ileride kullanacagiz
+                // Check if the mouse is over the tile and if the tile currently exists.
+                if (CheckCollisionPointRec(mousePosition, tiles[j][k][i].rectangle) && tiles[j][k][i].isExists) {
+                    // If the mouse is over an existing tile, return a pointer to that tile.
+                    return &tiles[j][k][i];
                 }
             }
         }
     }
 
+    // Return NULL if no tile is found at the mouse position in any layer.
     return NULL;
 }
 
-void shuffleBasedOnCondition(int* a, int* b, int size, int x) {
-    srand(time(NULL));  // Seed the random number generator
+void shuffleTilesBasedOnState(int* tileIDs, int* tileStates, int numTiles, int activeState) {
+    // Seed the random number generator with the current time to ensure different shuffle patterns each time the function is called.
+    srand(time(NULL));
 
-    // Dynamically allocate memory to store indices where b[i] == 1
-    int* indices = (int*)malloc(size * sizeof(int));
+    // Allocate memory dynamically to store indices of tiles whose states match the specified active state.
+    int* indices = (int*)malloc(numTiles * sizeof(int));
     if (indices == NULL) {
-        return; // Return if memory allocation failed
+        return; // Exit if memory cannot be allocated to prevent the function from proceeding with null pointers.
     }
 
-    // Collect indices where b[i] == 1
+    // Iterate over the tileStates array to find tiles that are in the 'active' state as defined by the game logic.
     int count = 0;
-    for (int i = 0; i < size; i++) {
-        if (b[i] == x) {
-            indices[count++] = i;
+    for (int i = 0; i < numTiles; i++) {
+        if (tileStates[i] == activeState) {
+            indices[count++] = i; // Store the index of each active tile and increment the counter.
         }
     }
 
-    // Shuffle elements in a according to collected indices
-    // Only shuffle elements where b[i] == 1
+    // Shuffle only the active tiles. This shuffling algorithm ensures that each element has an equal chance of being in any position.
     for (int i = count - 1; i > 0; i--) {
-        int j = rand() % (i + 1);  // Generate a random index
-        // Swap the elements at indices[i] and indices[j]
-        int temp = a[indices[i]];
-        a[indices[i]] = a[indices[j]];
-        a[indices[j]] = temp;
+        int j = rand() % (i + 1); // Generate a random index less than or equal to i.
+        // Swap the elements at the current index (i) and the randomly chosen index (j) to shuffle the tile IDs.
+        int temp = tileIDs[indices[i]];
+        tileIDs[indices[i]] = tileIDs[indices[j]];
+        tileIDs[indices[j]] = temp;
     }
 
-    // Free the dynamically allocated memory
-    free(indices); //memory ile işimiz bitti deallocate ediyoruz
-    indices = NULL; //hata ile az karşılaşmak için
+    // Clean up by freeing the dynamically allocated memory to avoid memory leaks.
+    free(indices);
+    indices = NULL; // Set the pointer to NULL to prevent use after free, enhancing security and stability.
 }
 
-void shuffle_all(LastTwoClicked* hint, int* isExist, int* original) {
-    if (hint->lastClicked != NULL && hint->previousClicked != NULL) {
-        hint->lastClicked->color = RAYWHITE;
-        hint->previousClicked->color = RAYWHITE;
-
-        hint->lastClicked = NULL;
-        hint->previousClicked = NULL;
-    }
-    shuffleBasedOnCondition(original, isExist, ARRAY_SIZE, 1);
-    for (int i = 0, a = 0; i < LAYER; i++) {
+void AssignNewValuesToTiles(int* tileActivityStates, int* tileOrder) {
+    // Iterate through each layer of the game's tile grid
+    for (int i = 0, tileIndex = 0; i < LAYER; i++) {
         for (int j = 0; j < ARRAY_Y; j++) {
-            for (int k = 0; k < ARRAY_X; k++, a++) {
-                if (tiles[j][k][i].isExists == true && isExist[tiles[j][k][i].order] == 1) {
-                    tiles[j][k][i].id = original[tiles[j][k][i].order];//taslari karilmis desteden sec
-                    tiles[j][k][i].texture = textures[tiles[j][k][i].id];//desteden secilen sayiya gore tasa sekil atamasi yap
+            for (int k = 0; k < ARRAY_X; k++, tileIndex++) {
+                // Check if the current tile is marked as existing and active
+                if (tiles[j][k][i].isExists == true && tileActivityStates[tiles[j][k][i].order] == 1) {
+
+                    // Assign a new ID from the shuffled tile order to the active tile
+                    tiles[j][k][i].id = tileOrder[tiles[j][k][i].order];
+
+                    // Update the tile's texture based on the new ID
+                    tiles[j][k][i].texture = textures[tiles[j][k][i].id];
                 }
             }
         }
     }
-
-    if (hint->lastClicked != NULL && hint->previousClicked != NULL) { //karıştırma komutuna basarsan mavi ile işaretlenen taşları normal haline getirir
-        hint->lastClicked->color = RAYWHITE;
-        hint->previousClicked->color = RAYWHITE;
-    }
 }
 
-void resetHint(LastTwoClicked* hint) {
-    if (hint->lastClicked != NULL) {    
-        hint->lastClicked->color = RAYWHITE;
-    }
-    if (hint->previousClicked != NULL) {
-        hint->previousClicked->color = RAYWHITE;
-    }
-
+void resetHint(LastTwoClicked* hint) {// Reset hint colors to white and clear the hint selection if any hints are currently displayed.
     if (hint->lastClicked != NULL) {
-        hint->lastClicked = NULL;
+        hint->lastClicked->color = RAYWHITE; // Set the color of the last clicked hint tile back to white.
     }
     if (hint->previousClicked != NULL) {
-        hint->previousClicked = NULL;
+        hint->previousClicked->color = RAYWHITE; // Set the color of the previously clicked hint tile back to white.
+    }
+
+    // Clear the hint pointers to indicate that there are no current hints.
+    if (hint->lastClicked != NULL) {
+        hint->lastClicked = NULL; // Remove the reference to the last clicked hint tile.
+    }
+    if (hint->previousClicked != NULL) {
+        hint->previousClicked = NULL; // Remove the reference to the previously clicked hint tile.
     }
 }
 
-void randomFiller(int* original) {
-    // Diziyi doldur
+
+void setupTileIDs(int* tileIDs) {
+    // Fill the array with numbers where each number repeats four times. This setup is for 36 types of tiles, making a total of 144 tiles.
     for (int i = 0; i < ARRAY_SIZE; i++) {
-        original[i] = i / 4;  // Her 4 eleman aynı değeri alacak
+        tileIDs[i] = i / 4;  // Every four slots get the same number, matching the tile types.
     }
 }
 
 void resetLastClicks(LastTwoClicked* LastClicks) {
+    // If there are tiles selected, change their color back to white and clear the selections.
     if (LastClicks->lastClicked != NULL) {
-        LastClicks->lastClicked->color = RAYWHITE;
-        LastClicks->lastClicked = NULL;
+        LastClicks->lastClicked->color = RAYWHITE; // Change the color of the last clicked tile to white.
     }
     if (LastClicks->previousClicked != NULL) {
-        LastClicks->previousClicked->color = RAYWHITE;
-        LastClicks->previousClicked = NULL;
+        LastClicks->previousClicked->color = RAYWHITE; // Change the color of the previously clicked tile to white.
+    }
+
+    // Clear the pointers to the last and previous clicked tiles to reset the selection.
+    if (LastClicks->lastClicked != NULL) {
+        LastClicks->lastClicked = NULL; // Clear the reference to the last clicked tile.
+    }
+    if (LastClicks->previousClicked != NULL) {
+        LastClicks->previousClicked = NULL; // Clear the reference to the previously clicked tile.
     }
 }
 
 void unloadGameSounds() {
-    UnloadSound(gameSound);
-    UnloadSound(buttonSound);
-    UnloadSound(selectSound);
+    UnloadSound(gameSound);// Remove the game background music from memory to free up resources.
+    
+    UnloadSound(buttonSound);// Remove the sound effect used for button clicks to free up resources.
+
+    UnloadSound(selectSound); // Remove the sound effect used for selecting items to free up resources.
 }
 
 void addPoints(LastTwoClicked LastClicks, GameState* gameState) {
-    int combo = gameState->combo;
-    int point = LastClicks.lastClicked->point;
-    if (gameState->combo < 3) {
+                                    
+    int combo = gameState->combo; // Get the current combo level from the game.
+    
+    int point = LastClicks.lastClicked->point; // Get the number of points from the last clicked tile.
+
+    if (gameState->combo < 3) { // If the combo level is below 3, increase it by 1.
         gameState->combo++;
     }
 
-    gameState->totalPoint += 2 * combo * point;
-    gameState->lastMatchTime = gameState->gameTime;
+    gameState->totalPoint += 2 * combo * point; // Add more points to the total score, multiplying the tile’s points by the combo and 2.
+
+    gameState->lastMatchTime = gameState->gameTime; // Record the time when this match was made.
 
     return;
 }
 
-void deletePointsforHint(GameState* gameState) {
+
+void deletePointsforHint(GameState* gameState) { // Subtract 20 pts from totalPoint, every time a hint is called.
     gameState->totalPoint -= 20;
 }
 
-void deletePointsforShuffle(GameState* gameState) {
+void deletePointsforShuffle(GameState* gameState) { // Subtract 50 pts from totalPoint, every time shuffle is called.
     gameState->totalPoint -= 50;
 }
 
 int countMatchableTiles(GameState* gameState) {
-    for (int i = 0; i < NUM_IMAGES; i++){
-        clickable_freq[i] = 0;
+    // Reset the frequency counter for each type of tile.
+    for (int i = 0; i < NUM_IMAGES; i++) {
+        clickableTilesPerType[i] = 0;
     }
 
-    int count = 0;
+    int count = 0; // Initialize a counter to track the number of matchable tile types.
+
+    // Traverse through each layer and tile on the board.
     for (int i = 0; i < LAYER; i++) {
         for (int j = 0; j < ARRAY_Y; j++) {
-            for (int k = 0; k < ARRAY_X; k++) {
+            for (int k = 0; k < ARRAY_X; k++) { // Determine if each tile is clickable and update its status.
                 tiles[j][k][i].isClickable = isClickable(&tiles[j][k][i]);
-                //printf(" %d ", tiles[j][k][i].id);
-                if (tiles[j][k][i].isClickable == 1) {
-                    clickable_freq[tiles[j][k][i].id] += 1;
+
+                if (tiles[j][k][i].isClickable) { // If the tile is clickable, increment its type's frequency in the clickableTilesPerType array.
+                    clickableTilesPerType[tiles[j][k][i].id]++;
                 }
             }
         }
     }
-    
-    for (int i = 0; i < NUM_IMAGES; i++){
-        if (clickable_freq[i] >= 2) {
+
+    for (int i = 0; i < NUM_IMAGES; i++) { // Count how many tile types have two or more clickable instances.
+        if (clickableTilesPerType[i] >= 2) {
             count++;
         }
     }
 
-    gameState->matchable = count;
-    
-    return count;
+    gameState->matchable = count; // Update the game state with the number of matchable tile types.
+
+    return count; // Return the total number of matchable tile types.
 }
 
-void minutesAndSeconds(GameState* gameState) {
-    const int countdown_minute = 5;
+void updateTime(GameState* gameState) {
+    const int countdown_minute = 5; // Set the total countdown time in minutes.
 
-    int minutes = countdown_minute - (int)gameState->gameTime / 60 - 1;
+    // Calculate the remaining minutes by subtracting the elapsed minutes from the countdown total.
+    int minutes = countdown_minute - (int)(gameState->gameTime / 60) - 1;
+    // Calculate the remaining seconds by taking the remainder of the elapsed time divided by 60.
     int seconds = 60 - (int)gameState->gameTime % 60;
+
+    // Correct the seconds and minutes calculation if seconds reach 60.
     if (seconds == 60) {
-        seconds = 0;
-        minutes++;
+        seconds = 0; // Reset seconds to zero.
+        minutes++; // Increment the minutes since a full minute has passed.
     }
 
+    // Update the game state with the new minutes and seconds.
     gameState->minutes = minutes;
     gameState->seconds = seconds;
 }
 
 void isGameOver(GameState* gameState) {
-    /*printf("Checking game over conditions: Frames: %d, Start Time: %.2f, Current Time: %.2f\n",
-        framesCounter, gameState->startTime, GetTime());*/
+    int minutes = gameState->minutes; // Get the remaining minutes from game state.
+    int seconds = gameState->seconds; // Get the remaining seconds from game state.
 
+    // Check if all tiles have been matched or used, which means the player wins.
     if (gameState->remainingTile == 0) {
-        gameState->isMapSelected = false;
-        gameState->gameScreen = win;
-        //printf("Game Over: Victory\n");
+        gameState->isMapSelected = false; // Indicate that no map is currently selected.
+        gameState->gameScreen = win; // Change the game screen to the win screen.
     }
-    else if ((double)framesCounter / 60 - gameState->startTime > 300.0) {
-        gameState->isMapSelected = false;
-        gameState->gameScreen = gameOver;
-        //printf("Game Over: Time Limit Exceeded\n");
+    // Check if the total time has exceeded 5 minutes (300 seconds), indicating game over due to timeout.
+    else if (minutes * 60 + seconds > 300) {
+        gameState->isMapSelected = false; // Indicate that no map is currently selected.
+        gameState->isGameActive = false; // Indicate that the game is no longer active.
+        gameState->gameScreen = gameOver; // Change the game screen to the game over screen.
     }
 }
 
+
 void drawGame() {
+    // Draw the game background.
     DrawTexture(backGroundTexture[1], 0, 0, WHITE);
 
-    DrawTexture(symbolsTexture[5], screenWidth / 2 + 500, 120, WHITE);
-    DrawTexture(symbolsTexture[4], screenWidth / 2 + 500, 220, WHITE);
-    DrawTexture(symbolsTexture[3], screenWidth / 2 + 495, 20, WHITE);
-    DrawTexture(symbolsTexture[2], screenWidth / 2 + 495, 320, WHITE);
-    
-    DrawText(TextFormat("%d", (&gameState)->totalPoint), screenWidth / 2 + 570, 135, 40, RAYWHITE);
-    DrawText(TextFormat("x %d", (&gameState)->matchable), screenWidth / 2 + 500 + 70, 240, 40, RAYWHITE);
-    DrawText(TextFormat("%d:%.2d", gameState.minutes, gameState.seconds), screenWidth / 2 + 495 + 70, 40, 40, RAYWHITE);
-    DrawText(TextFormat("x %d", gameState.remainingTile), screenWidth / 2 + 565, 340, 40, RAYWHITE);
-    //DrawText(TextFormat("Remaining Tile: %.2lf", gameState.lastMatchTime), 1100, 500, 40, RED);
-    BeginMode2D(camera); // Begin 2D mode with camera
-    for (int k = 1, a = 0; k < LAYER; k++) {
+    // Draw various symbols on the game screen.
+    DrawTexture(symbolsTexture[2], screenWidth / 2 + 495, 320, WHITE); // Draw the symbol for remaining tiles.
+    DrawTexture(symbolsTexture[3], screenWidth / 2 + 495, 20, WHITE); // Draw the hourglass symbol for remaining time.
+    DrawTexture(symbolsTexture[4], screenWidth / 2 + 500, 220, WHITE); // Draw the symbol for removable tiles.
+    DrawTexture(symbolsTexture[5], screenWidth / 2 + 500, 120, WHITE); // Draw the symbol for current points.
+
+    // Display dynamic game information such as remaining tiles, time, matchable tiles, and current points.
+    DrawText(TextFormat("x %d", gameState.remainingTile), screenWidth / 2 + 565, 340, 40, RAYWHITE); // Remaining tiles count.
+    DrawText(TextFormat("%d:%.2d", gameState.minutes, gameState.seconds), screenWidth / 2 + 495 + 70, 40, 40, RAYWHITE); // Remaining game time.
+    DrawText(TextFormat("x %d", gameState.matchable), screenWidth / 2 + 500 + 70, 240, 40, RAYWHITE); // Number of matchable tiles.
+    DrawText(TextFormat("%d", gameState.totalPoint), screenWidth / 2 + 570, 135, 40, RAYWHITE); // Current score.
+
+    // Begin drawing in 2D mode with the camera settings.
+    BeginMode2D(camera);
+
+    // Loop through each layer and tile to draw the existing tiles with their respective textures and colors.
+    for (int k = 1; k < LAYER; k++) {
         for (int i = 0; i < ARRAY_Y; i++) {
             for (int j = 0; j < ARRAY_X; j++) {
-                if (tiles[i][j][k].isExists == true) {
+                if (tiles[i][j][k].isExists) {
                     DrawTexture(tiles[i][j][k].texture, tiles[i][j][k].rectangle.x, tiles[i][j][k].rectangle.y, tiles[i][j][k].color);
                 }
             }
         }
     }
 
-    EndMode2D(); // End 2D mode
+    // End the 2D mode after drawing all elements.
+    EndMode2D();
 }
 
 void resetGame() {
- 
+    // Reset all values in newMap to zero, clearing any previous game state.
     for (int y = 0; y < ARRAY_Y; y++) {
         for (int x = 0; x < ARRAY_X; x++) {
             for (int l = 0; l < LAYER; l++) {
@@ -465,101 +482,124 @@ void resetGame() {
             }
         }
     }
-    
+
+    // Clear the main map array to prepare for a new game.
     for (int y = 0; y < ARRAY_Y; y++) {
         for (int x = 0; x < ARRAY_X; x++) {
             map[y][x] = 0;
         }
     }
 
+    // Reset tile existence flags to indicate no tiles are initially present.
     for (int i = 0; i < ARRAY_SIZE; i++) {
         isExist[i] = 0;
-        clickable_freq[i] = 0;
     }
 
-    randomFiller(original);
-    if (&hint != NULL) {
-        resetHint(&hint);
+    // Clear counts of clickable tiles per type, resetting game logic related to tile interaction.
+    for (int i = 0; i < NUM_IMAGES; i++) {
+        clickableTilesPerType[i] = 0;
     }
-    if (&LastClicks != NULL) {
-        resetLastClicks(&LastClicks);
-    }
-    (&gameState)->combo = 1;
-    (&gameState)->gameTime = 0;
-    (&gameState)->totalPoint = 0;
-    (&gameState)->lastMatchTime = 0;
-    (&gameState)->remainingTile = ARRAY_SIZE;
-    (&gameState)->isMapSelected = false;
-    saveGuiVisible = true;
+
+    // Reinitialize tile IDs to their default setup, ensuring consistent starting conditions.
+    setupTileIDs(tileIDs);
+
+    // Reset hints to clear any selections and visual indicators from previous games.
+    resetHint(&hint);
+
+    // Clear last clicks to prevent unintended interactions from lingering selections.
+    resetLastClicks(&LastClicks);
+
+    // Reset various game state parameters to default values.
+    gameState.combo = 1;             // Reset combo multiplier.
+    gameState.gameTime = 0;          // Reset the game clock.
+    gameState.totalPoint = 0;        // Reset the score to zero.
+    gameState.lastMatchTime = 0;     // Clear the timestamp of the last match.
+    gameState.remainingTile = ARRAY_SIZE;  // Reset the count of remaining tiles.
+    gameState.isMapSelected = false; // Indicate no map is currently selected.
+    saveGuiVisible = true;           // Ensure the save GUI is visible if needed.
+
+    // Clear any dynamically allocated memory for the game's linked list and reset the head pointer.
+    free(head);
     head = NULL;
+
+    // Reset the text buffer used for input or display.
     strcpy(text, "\0");
-    for (int i = 0; i < 1024; i++) {
-        strcpy(entries[i].text, "\0");
-        entries[i].points = 0;
-    }
 }
+
 
 void savingText() {
-    // GUI to get text input and handle save trigger
-    if (GuiButton((Rectangle) { 790, 400, 100, 30 }, "Save Text") || IsKeyPressed(KEY_ENTER)) {
-        saveGuiVisible = false; // Hide the GUI elements after interaction
-        /*int blank = 0;
-        for (int i = 0; i < strlen(text); i++) {
-            if (isblank(text[i])) {
-                blank++;
-            }
-        }
-        for (int i = 0; i < blank-1; i++){
-            if (isblank(text[i])) {
-                text[i] = '_';
-            }
-        }*/
-        // Sort and save the new entry
+    // Check if the Save button is clicked or Enter key is pressed.
+    if (GuiButton((Rectangle) { 790, 400, 100, 30 }, "Save") || IsKeyPressed(KEY_ENTER)) {
+        saveGuiVisible = false; // Hide the save GUI elements after the button is pressed or Enter is hit.
+
+        // Sort the high scores and write the new entry to the high scores file.
         sort_and_write_scores("../assets/highscores.txt", text, gameState.totalPoint);
+        // Output the saved text to the console for confirmation.
         printf("%s\n", text);
     }
-    DrawText("Enter a name: ", screenWidth / 2 - 240, 354, 25, RAYWHITE);
-    GuiTextBox((Rectangle) { screenWidth / 2 - 50, 350, 220, 30 }, text, 256, true);
-    
 
+    // Display instructions for entering a name above the text box.
+    DrawText("Enter a name: ", screenWidth / 2 - 240, 354, 25, RAYWHITE);
+    // Create a text box for player input, enabling the player to type their name.
+    GuiTextBox((Rectangle) { screenWidth / 2 - 50, 350, 220, 30 }, text, 256, true);
+
+    // Check if the save GUI is not visible and the highscores file could not be opened.
     if (!saveGuiVisible && fopen("../assets/highscores.txt", "r") == NULL) {
-        DrawText("Failed to save!", screenWidth / 2 - 50, 340, 20, RED); // Error message if file opening fails
+        // Display an error message if the high scores file fails to open.
+        DrawText("Failed to save!", screenWidth / 2 - 50, 340, 20, RED);
     }
 }
+
 
 void sort_and_write_scores(const char* filename, const char* text, int points) {
     int count = 0;
-    // Read existing data
-    FILE* file1 = fopen("../assets/highscores.txt", "r");
+    ScoreEntry entries[MAX_LINES];  // Assuming this is defined somewhere globally or passed in.
+
+    // Open the file to read existing scores.
+    FILE* file = fopen(filename, "r+");
     if (file != NULL) {
+        // Read existing entries from the file.
         while (fscanf(file, "%s %d\n", entries[count].text, &entries[count].points) == 2) {
             if (++count >= MAX_LINES) break;
-            printf("%s", entries[count].text);
         }
-        fclose(file1);
     }
-    
+    else {
+        // If the file doesn't exist, open it for writing (this creates the file).
+        file = fopen(filename, "w");
+        if (file == NULL) return; // If the file still can't be opened, exit the function.
+    }
+
+    // Add the new score to the list of entries.
     strcpy(entries[count].text, text);
     entries[count].points = points;
     count++;
 
+    // Sort the scores.
     qsort(entries, count, sizeof(ScoreEntry), compare_scores);
 
-    file1 = fopen("../assets/highscores.txt", "w");
-    if (file1 != NULL) {
-        for (int i = 0; i < count; i++) {
-            printf("%s", entries[i].text);
-            fprintf(file1, "%s %d\n", entries[i].text, entries[i].points);
-        }
-        fclose(file1);
+    // Rewind the file to start writing from the beginning.
+    rewind(file);
+
+    // Write the sorted scores back to the file.
+    for (int i = 0; i < count; i++) {
+        fprintf(file, "%s %d\n", entries[i].text, entries[i].points);
     }
+
+    // Close the file.
+    fclose(file);
 }
 
+
 int compare_scores(const void* a, const void* b) {
+    // Cast the void pointers to ScoreEntry pointers for accessing the points.
     ScoreEntry* entryA = (ScoreEntry*)a;
     ScoreEntry* entryB = (ScoreEntry*)b;
-    return (entryB->points - entryA->points);  // Descending order
+
+    // Compare the points for sorting in descending order. If entryB's points are
+    // greater than entryA's, a positive number is returned, sorting entryB before entryA.
+    return (entryB->points - entryA->points);
 }
+
 
 void print10() {
     FILE* file3 = fopen("../assets/highscores.txt", "r");
@@ -587,36 +627,81 @@ void print10() {
 }
 
 void updateCombo(GameState* gameState) {
+    // Check the time elapsed since the last match; reset combo if it exceeds 6 seconds.
     if (gameState->gameTime - gameState->lastMatchTime > 6.0) {
-        gameState->combo = 1;
+        gameState->combo = 1; // Reset the combo multiplier to 1 when more than 6 seconds pass without a match.
     }
 }
 
 void drawCombo() {
+    // Calculate the width of the combo timer bar, which decreases over time from the last match.
     int width = 150 * (6 - (gameState.gameTime - gameState.lastMatchTime));
+
     if (gameState.combo == 2) {
-        DrawRectangle(155, 20, width, 60, (Color) { 235, 227, 197, 255 });
+        // Draw the remaining time bar for the combo with a specific color.
+        DrawRectangle(155, 20, width, 60, (Color) { 235, 227, 197, 255 }); // Light beige color bar
+        
+        // Display the 2x combo symbol.
         DrawTexture(symbolsTexture[0], 100, 10, RAYWHITE);
     }
     else if (gameState.combo == 3) {
-        DrawRectangle(155, 20, width, 60, (Color) { 213, 194, 105, 255 });
+        // Draw the remaining time bar for the combo with a different color.
+        DrawRectangle(155, 20, width, 60, (Color) { 213, 194, 105, 255 }); // Golden color bar
+        
+        // Display the 3x combo symbol.
         DrawTexture(symbolsTexture[1], 100, 10, RAYWHITE);
     }
 }
 
 void endScreen() {
+    // Display the high score symbol on the screen.
     DrawTexture(symbolsTexture[6], 30, 30, RAYWHITE);
+
+    // Stop the background game music as the game ends.
     StopSound(gameSound);
-    if (GuiButton((Rectangle) { 670, 400, 100, 30 }, "MAIN")) {
-        resetGame();
-        PlaySound(buttonSound);
-        gameState.gameScreen = starting;
+
+    // Check if the 'Main' button is clicked to return to the main game screen.
+    if (GuiButton((Rectangle) { 670, 400, 100, 30 }, "Main")) {
+        resetGame(); // Reset the game to initial state for a new session.
+        PlaySound(buttonSound); // Play a sound to confirm button press.
+        gameState.gameScreen = starting; // Change the screen to the starting menu.
     }
-    if (saveGuiVisible == true && gameState.totalPoint > point[9]) {
-        savingText();
+
+    // Show the saving text screen if the player's score is high enough to enter the top scores.
+    if (saveGuiVisible == true && gameState.totalPoint >= point[9]) {
+        savingText(); // Activate the save screen for the player to enter their name.
     }
+
+    // Display the top 10 scores.
     print10();
-    if (gameState.totalPoint > point[9]) {
+
+    // If the player's score qualifies as a new record, display the new record symbol.
+    if (gameState.totalPoint >= point[9]) {
         DrawTexture(symbolsTexture[7], 1130, 615, RAYWHITE);
+    }
+}
+
+void InitCamera(Camera2D* camera) {
+    // Set the camera's target to the center of the screen.
+    camera->target = (Vector2){ screenWidth / 2.0f, screenHeight / 2.0f };
+    // Set the camera's offset to center the view in the middle of the screen.
+    camera->offset = (Vector2){ screenWidth / 2.0f, screenHeight / 2.0f };
+    // Initialize the camera's rotation to zero; no rotation is applied.
+    camera->rotation = 0.0f;
+    // Set the camera's zoom level to 1.0, implying no zoom.
+    camera->zoom = 1.0f;
+}
+
+
+void checkCameraForShake(Camera2D* camera) {
+    if (shakeTime > 0) {
+        // Apply a shaking effect to the camera by randomly altering its offset.
+        camera->offset.x = screenWidth / 2.0f + GetRandomValue(-shakeMagnitude, shakeMagnitude);
+        camera->offset.y = screenHeight / 2.0f + GetRandomValue(-shakeMagnitude, shakeMagnitude);
+        shakeTime--; // Decrement the shake time with each frame.
+    }
+    else {
+        // Once the shaking time has elapsed, reset the camera offset to the center.
+        camera->offset = (Vector2){ screenWidth / 2.0f, screenHeight / 2.0f };
     }
 }

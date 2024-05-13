@@ -18,10 +18,10 @@
 #define MAX_LINES 1024 
 
 typedef struct tile {
-    int point;//point of tile, tür
-    int id; //shuffled, tür
+    int point; // points of tiles
+    int id; //tile id's
     int order;
-    bool isExists; //newMap, konum
+    bool isExists;
     bool isClickable;
 
     Rectangle rectangle;
@@ -42,7 +42,6 @@ typedef struct GameState {
     // Define game state variables
     bool isGameActive;
     bool isMapSelected;
-    //bool runbefore;
 
     int remainingTile;
     int totalPoint;
@@ -73,13 +72,8 @@ typedef struct {
     char text[30];
 } ScoreEntry;
 
-extern Image images[NUM_IMAGES];    // Array to hold image data
-extern Texture2D textures[NUM_IMAGES]; // Array to hold textures
-
-extern Image backGround[4];    // background
+extern Texture2D textures[NUM_IMAGES];
 extern Texture2D backGroundTexture[4];
-
-extern Image symbols[8]; 
 extern Texture2D symbolsTexture[8];
 
 extern Sound gameSound;
@@ -89,12 +83,21 @@ extern Sound mapSelectionSound;
 extern Sound gameButtonSound;
 extern Sound shuffleSound;
 
-//extern screen gameScreen;
 extern LastTwoClicked LastClicks;
 extern LastTwoClicked hint;
-extern Vector2 combo;
+extern tile tiles[ARRAY_Y][ARRAY_X][LAYER];
+extern Vector2 mousePosition;
+extern GameState gameState;
 
 extern ScoreEntry entries[MAX_LINES];
+
+extern int map[ARRAY_Y][ARRAY_X];
+extern int newMap[ARRAY_Y][ARRAY_X][LAYER];
+
+extern int tileIDs[ARRAY_SIZE];
+extern int isExist[ARRAY_SIZE];
+extern int clickableTilesPerType[NUM_IMAGES];
+
 extern char lines[MAX_LINES][MAX_LINE_LENGTH];
 extern char text[256];
 extern bool saveGuiVisible;
@@ -105,18 +108,7 @@ extern int point[10];      // Array to store integers
 
 extern int offset;
 
-extern int map[ARRAY_Y][ARRAY_X];
-extern int newMap[ARRAY_Y][ARRAY_X][LAYER];
-
-extern int original[ARRAY_SIZE];
-extern int shuffled[ARRAY_SIZE];
-extern int isExist[ARRAY_SIZE];
-extern int clickable_freq[ARRAY_SIZE];
-
-extern tile tiles[ARRAY_Y][ARRAY_X][LAYER];
 extern int values[ARRAY_Y][ARRAY_X];
-extern Vector2 mousePosition;
-extern GameState gameState;
 
 extern const int screenWidth;
 extern const int screenHeight;

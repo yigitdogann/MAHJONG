@@ -1,2 +1,6 @@
-ZeroBugsGame 4290
-ammo 3890
+aj 180
+zkj 180
+asdf 180
+asdgajsk 120
+amk 120
+asdkg 0

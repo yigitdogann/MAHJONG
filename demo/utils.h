@@ -3,31 +3,32 @@
 
 #include "globals.h"
 
-void InitImagesSounds();
+void InitImages();
+
+void InitSounds();
 
 void readFile(GameState*);
 
 void InitMap();
 
-void InitObjects(LastTwoClicked*);
+void InitObjects();
 
 bool isClickable(tile*);
 
-// son tiklanilan 2 tas masadan kaldirilabilir mi? YES : NO
+//son tiklanilan 2 tas masadan kaldirilabilir mi? YES : NO
 bool isRemovable(LastTwoClicked);
 
 tile* getTopMostTile(tile, Vector2);
 
-void shuffleBasedOnCondition(int*, int*, int, int);
+void shuffleTilesBasedOnState(int*, int*, int, int);
 
-void shuffle_all(LastTwoClicked*, int*, int*);
+void AssignNewValuesToTiles(int*, int*);
 
 void resetHint(LastTwoClicked*);
-//void remover(LastTwoClicked* hint)
 
 void resetLastClicks(LastTwoClicked*);
 
-void randomFiller(int*);
+void setupTileIDs(int*);
 
 void unloadGameSounds();
 
@@ -39,7 +40,7 @@ void deletePointsforShuffle(GameState*);
 
 int countMatchableTiles(GameState*);
 
-void minutesAndSeconds(GameState*);
+void updateTime(GameState*);
 
 void isGameOver(GameState*);
 
@@ -59,8 +60,10 @@ void updateCombo(GameState*);
 
 void drawCombo();
 
-//void shake();
-
 void endScreen();
+
+void InitCamera(Camera2D*);
+
+void checkCameraForShake(Camera2D*);
 
 #endif

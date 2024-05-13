@@ -17,35 +17,16 @@ void updateAndDraw();
 void updateGame(GameState*);
 
 int main(void) {
-    camera.target = (Vector2){ screenWidth / 2.0f, screenHeight / 2.0f };
-    camera.offset = (Vector2){ screenWidth / 2.0f, screenHeight / 2.0f };
-    camera.rotation = 0.0f;
-    camera.zoom = 1.0f;
-
-    // Used to control the duration and intensity of the shake
-
-    InitWindow(screenWidth, screenHeight, "Mahjong Game");//pencere genislik X yukseklik, pencere adi 
+    InitWindow(screenWidth, screenHeight, "Mahjong Solitaire");//pencere genislik X yukseklik, pencere adi 
+    
     InitAudioDevice();
     SetTargetFPS(60);
-    InitImagesSounds();
+    InitImages();
+    InitSounds();
+    InitCamera(&camera);
+    GuiSetStyle(DEFAULT, TEXT_SIZE, 20);
     while (!WindowShouldClose()){
-        //if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
-        //{
-        //    shakeTime = 60; // Duration of shake in frames
-        //}
-
-        if (shakeTime > 0)
-        {
-            // Randomly adjust the camera's offset for shake effect
-            camera.offset.x = screenWidth / 2.0f + GetRandomValue(-shakeMagnitude, shakeMagnitude);
-            camera.offset.y = screenHeight / 2.0f + GetRandomValue(-shakeMagnitude, shakeMagnitude);
-            shakeTime--; // Decrease shake time
-        }
-        else
-        {
-            // Reset camera offset after shaking ends
-            camera.offset = (Vector2){ screenWidth / 2.0f, screenHeight / 2.0f };
-        }
+        checkCameraForShake(&camera);
         updateAndDraw();
     }
     unloadGameSounds();
@@ -56,214 +37,231 @@ int main(void) {
 }
 
 void updateAndDraw() {
-    BeginDrawing();
-    
+    BeginDrawing(); // Begin the drawing phase
+
     switch (gameState.gameScreen) {
     case starting:
-        if (!gameState.isMapSelected) {
-            DrawTexture(backGroundTexture[0], 0, 0, WHITE);
-            readFile(&gameState); // Consider moving or optimizing this call
+        if (!gameState.isMapSelected) { // Check if the map isn't selected yet
+            DrawTexture(backGroundTexture[0], 0, 0, WHITE); // Draw the main background texture
+            readFile(&gameState); // Read text files and upload their contents to a 3D array
         }
-        if (gameState.isMapSelected) {
-            InitMap();
-            InitObjects(&LastClicks);
-            gameState.remainingTile = ARRAY_SIZE;
-            gameState.startTime = GetTime();
-            gameState.gameScreen = game;
-            PlaySound(gameSound);
-            DrawTexture(backGroundTexture[1], 0, 0, WHITE); 
+        if (gameState.isMapSelected) { // If the map is selected
+            DrawTexture(backGroundTexture[1], 0, 0, WHITE); // Draw the game background texture
+            PlaySound(gameSound); // Play the background music for the game scene
+            InitMap(); // Initialize tile coordinates from the 3D array
+            setupTileIDs(tileIDs);
+            shuffleTilesBasedOnState(tileIDs, isExist, ARRAY_SIZE, 0); // Shuffle tiles or elements based on specific conditions
+            InitObjects(&LastClicks); // Initialize tile game objects(tiles)
+            gameState.remainingTile = ARRAY_SIZE; // Set the initial number of remaining tiles to 144
+            gameState.startTime = GetTime(); // Record the start time of the game
+            gameState.gameScreen = game; // Switch the game state to the main gameplay state
         }
         break;
     case game:
-        drawGame();
-        drawCombo();
-        updateGame(&gameState);
+        drawGame(); // Perform game drawing operations
+        drawCombo(); // Draw the combo indicator
+        updateGame(&gameState); // Update game state and handle input
         break;
     case gameOver:
-        DrawTexture(backGroundTexture[2], 0, 0, RAYWHITE);
-        endScreen();
+        DrawTexture(backGroundTexture[2], 0, 0, RAYWHITE); // Draw the game over screen background
+        endScreen(); // Display high scores, menu options, and save button
         break;
     case win:
-        DrawTexture(backGroundTexture[3], 0, 0, RAYWHITE);
-        endScreen();
-
+        DrawTexture(backGroundTexture[3], 0, 0, RAYWHITE); // Draw the win screen background
+        endScreen(); // Similar to gameOver, display high scores, menu, and save options
         break;
     }
-    framesCounter++;
-    EndDrawing();
+    framesCounter++; // Increment the frames counter for each frame rendered
+    EndDrawing(); // End the drawing phase
 }
+
 
 void updateGame(GameState* gameState) {
     mousePosition = GetMousePosition();
-    minutesAndSeconds(gameState); //zamanı dakika saniye cinsinden 3 dakikadan itibaren geriye saymamızı sağlar
-    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-        processClick(&hint, &LastClicks, mousePosition, &head);
-    }
-    if (GuiButton((Rectangle) { screenWidth / 2 + 500, screenHeight / 2 + 25, 100, 30 }, "SHUFFLE (TAB)") || IsKeyPressed(KEY_TAB)) {
-        deletePointsforShuffle(gameState);
-        resetHint(&hint);
-        resetLastClicks(&LastClicks);
-        PlaySound(shuffleSound); //butona basildigi icin buton sesi verildi
-        shuffle_all(&hint, isExist, original);
-        countMatchableTiles(gameState);
-    }
-    if (GuiButton((Rectangle) { screenWidth / 2 + 500, screenHeight / 2 + 100, 100, 30 }, "HINT (SPACE)") || IsKeyPressed(KEY_SPACE)) {
-        deletePointsforHint(gameState);
-        PlaySound(gameButtonSound);
-        countMatchableTiles(gameState);
-        resetHint(&hint);
-        resetLastClicks(&LastClicks);
-        giveHint(&hint, &LastClicks, clickable_freq);
-    }
-    if (GuiButton((Rectangle) { screenWidth / 2 + 500, screenHeight / 2 + 175, 100, 30 }, "UNDO (CTRL)") || IsKeyPressed(KEY_LEFT_CONTROL)) {
-        PlaySound(gameButtonSound);
-        deleteBegin(&head, isExist, &LastClicks);
-        countMatchableTiles(gameState);
-        resetLastClicks(&LastClicks);
-        gameState->combo = 1;
+    updateTime(gameState); // Counts down time from 5 minutes in minutes and seconds format
 
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+        processClick(&hint, &LastClicks, mousePosition, &head); // Process a click event
     }
-    if (GuiButton((Rectangle) { screenWidth / 2 + 500, screenHeight / 2 + 250, 100, 30 }, "MAIN")) {
-        PlaySound(buttonSound);
-        resetGame();
-        gameState->gameScreen = starting;
+    if (GuiButton((Rectangle) { screenWidth / 2 + 500, screenHeight / 2 + 25, 150, 50 }, "Shuffle (TAB)") || IsKeyPressed(KEY_TAB)) {
+        deletePointsforShuffle(gameState); // Deletes points as a penalty for shuffling
+        resetHint(&hint); // Resets hint data
+        resetLastClicks(&LastClicks); // Resets the last click information
+        PlaySound(shuffleSound); // Plays the shuffle sound
+        shuffleTilesBasedOnState(tileIDs, isExist, ARRAY_SIZE, 1); // Shuffle the IDs of tiles isExist == 1, to randomize
+        AssignNewValuesToTiles(isExist, tileIDs); // Update the tile IDs and textures on the board to reflect the new shuffled order.
+        countMatchableTiles(gameState); // Recounts matchable tiles after shuffling
     }
-    if (GuiButton((Rectangle) { screenWidth / 2 + 500, screenHeight / 2 + 325, 100, 30 }, "END (X)") || IsKeyPressed(KEY_X)) {
-        PlaySound(buttonSound);
-        gameState->gameScreen = gameOver;
+    if (GuiButton((Rectangle) { screenWidth / 2 + 500, screenHeight / 2 + 100, 150, 50 }, "Hint (SPACE)") || IsKeyPressed(KEY_SPACE)) {
+        //deletePointsforHint(gameState); // Points penalty for hint, commented out perhaps for testing
+        PlaySound(gameButtonSound); // Plays a generic game button sound
+        countMatchableTiles(gameState); // Ensures matchable tiles are counted before hint is given
+        resetHint(&hint); // Resets hint data
+        resetLastClicks(&LastClicks); // Resets the last clicks data
+        giveHint(&hint, &LastClicks, clickableTilesPerType); // Provides a hint to the player
     }
-    gameState->gameTime = GetTime() - gameState->startTime;
-    gameState->matchable = countMatchableTiles(gameState);
-    isGameOver(gameState);
-    updateCombo(gameState);
+    if (GuiButton((Rectangle) { screenWidth / 2 + 500, screenHeight / 2 + 175, 150, 50 }, "Undo (CTRL)") || IsKeyPressed(KEY_LEFT_CONTROL)) {
+        PlaySound(gameButtonSound); // Plays a generic game button sound
+        deleteBegin(&head, isExist, &LastClicks); // Undoes the last move
+        countMatchableTiles(gameState); // Updates matchable tiles after undoing
+        resetLastClicks(&LastClicks); // Resets the last clicks data
+        gameState->combo = 1; // Resets combo multiplier
+    }
+    if (GuiButton((Rectangle) { screenWidth / 2 + 500, screenHeight / 2 + 250, 150, 50 }, "Main")) {
+        PlaySound(buttonSound); // Plays a sound for returning to the main menu
+        resetGame(); // Resets the game and pointer values
+        gameState->gameScreen = starting; // Changes the game screen to starting menu
+    }
+    if (GuiButton((Rectangle) { screenWidth / 2 + 500, screenHeight / 2 + 325, 150, 50 }, "End (X)", 40) || IsKeyPressed(KEY_X)) {
+        PlaySound(buttonSound); // Plays a button sound for game ending
+        gameState->gameScreen = gameOver; // Sets the game screen to game over
+    }
+
+    gameState->gameTime = GetTime() - gameState->startTime; // Updates the game time
+    gameState->matchable = countMatchableTiles(gameState); // Updates the number of matchable tiles available
+    isGameOver(gameState); // Checks if the game is over
+    updateCombo(gameState); // Updates the combo multiplier based on actions
 }
+
 
 void processClick(LastTwoClicked* hint, LastTwoClicked* LastClicks, Vector2 mousePosition, node** head) {
     tile* pointer = NULL;
-    resetHint(hint);
-    
-    pointer = getTopMostTile(tiles, mousePosition);// imlec ile tiklanilan tasi point eder
-    
+    resetHint(hint); // Resets the hint information
+
+    pointer = getTopMostTile(tiles, mousePosition); // Points to the tile clicked by the cursor
+
     if (pointer != NULL) {
-        if (pointer->isClickable == false)shakeTime = 10;
+        if (pointer->isClickable == false)
+            shakeTime = 10; // Triggers a shake effect if the tile is not clickable
     }
 
-    //tiklanilabilir bir tas ise && son tiklanilan tasa bir kez daha tiklanmiyorsa LastClicked guncellenir
+    // If the tile is clickable and is not the same as the last clicked tile, update LastClicked
     if (isClickable(pointer) && LastClicks->lastClicked != pointer) {
-        PlaySound(selectSound); //secilebilir bir tasa tikladigi icin selectSound sesi verildi
-        
-        if (LastClicks->previousClicked != NULL) {//crash olmamasi icin eklendi, bos olan bir adresin degerini degistirmeye calisacakti, boylece program cokecekti 
-            LastClicks->previousClicked->color = RAYWHITE;//eski onceki tiklanilani beyaz yapar (son 2yi kirmizi yapiyoruz o artik 3.)
-        }        
+        PlaySound(selectSound); // Plays a sound because a clickable tile was clicked
+
+        if (LastClicks->previousClicked != NULL) { // Prevents crash by not trying to modify a NULL address
+            LastClicks->previousClicked->color = RAYWHITE; // Changes the color of the previously clicked tile to white
+        }
         if (LastClicks->lastClicked != NULL) {
-            LastClicks->lastClicked->color = RAYWHITE;//yeni onceki tiklanilani eski son tiklanilan yapar
+            LastClicks->lastClicked->color = RAYWHITE; // Changes the color of the last clicked tile to white (now the third last)
         }
 
-        LastClicks->previousClicked = LastClicks->lastClicked;//yeni onceki tiklanilani eski son tiklanilan yapar
-        LastClicks->lastClicked = pointer;//son tiklanilani alir
+        LastClicks->previousClicked = LastClicks->lastClicked; // Updates the previously clicked to the last clicked
+        LastClicks->lastClicked = pointer; // Updates the last clicked tile
         if (LastClicks->lastClicked != NULL) {
-            LastClicks->lastClicked->color = RED;//son tiklanilani kirmizi yapar
+            LastClicks->lastClicked->color = RED; // Sets the color of the last clicked tile to red
         }
 
-        if (isRemovable(*LastClicks) == true) {//son 2 tas kaldirilabilir tas mi?
-            addBegin(head, LastClicks, isExist);//linked liste ekle (masadan kaldir)
-            addPoints(*LastClicks, &gameState);
-            resetLastClicks(LastClicks);
-            countMatchableTiles(&gameState);
+        if (isRemovable(*LastClicks) == true) { // Checks if the last two clicked tiles are removable
+            addBegin(head, LastClicks, isExist); // Adds to linked list (removes from table)
+            addPoints(*LastClicks, &gameState); // Adds points to the game state
+            resetLastClicks(LastClicks); // Resets the last clicks information
+            countMatchableTiles(&gameState); // Recalculates matchable tiles
+            gameState.remainingTile -= 2; // Subtract 2 from the remaining tiles counter
+            if (gameState.matchable == 0) {
+                shakeTime = 10; // Triggers a shake effect if no tiles are matchable
+            }
         }
     }
-    
-    //free(pointer);
+
     return;
 }
 
+
 void addBegin(node** head, LastTwoClicked* LastClicks, int* isExist) {
-    node* newNode = (node*)malloc(sizeof(node)); // memoryden node kadar yer ayir ve bu yeri pointerla erisilebilir yap
-    if (newNode == NULL) {//memory ayrilamadiysa konsola allocation erroru yazdir.
-        printf("Memory allocation error in add_node_begin()\n");
+    node* newNode = (node*)malloc(sizeof(node)); // Allocate memory for a new node
+    if (newNode == NULL) { // Check if memory allocation failed
+        printf("Memory allocation error in add_node_begin()\n"); // Print error message if allocation fails
         return;
     }
 
-    gameState.remainingTile -= 2;
+    LastClicks->lastClicked->isExists = false; // Mark the last clicked tile as non-existent
+    LastClicks->previousClicked->isExists = false; // Mark the previously clicked tile as non-existent
 
-    LastClicks->lastClicked->isExists = false; // son tiklanilan taslarin cizilemez ve tiklanilamaz olmasi icin 
-    LastClicks->previousClicked->isExists = false;
+    newNode->data1 = LastClicks->lastClicked; // Store the pointer to the last clicked tile
+    newNode->data2 = LastClicks->previousClicked; // Store the pointer to the previously clicked tile
 
-    newNode->data1 = LastClicks->lastClicked; //son tiklanilan ciftin adresini tut
-    newNode->data2 = LastClicks->previousClicked;
+    newNode->data1->combo = gameState.combo; // Save the current combo value to the last clicked tile
+    newNode->data2->combo = gameState.combo; // Save the current combo value to the previously clicked tile
 
-    newNode->data1->combo = (&gameState)->combo;
-    newNode->data2->combo = (&gameState)->combo;
+    isExist[newNode->data1->order] = 0; // Update the existence array for the last clicked tile to 0
+    isExist[newNode->data2->order] = 0; // Update the existence array for the previously clicked tile to 0
 
-    isExist[newNode->data1->order] = 0;//linked liste eklerken o taşa karşılık değer 0 oldu
-    isExist[newNode->data2->order] = 0;
-   
-    newNode->nextNode = *head; //newNode listenin en basina eklendi
+    newNode->nextNode = *head; // Link the new node to the beginning of the list
 
-    *head = newNode; //artik head cagrilirken onceki satirda guncellenmis liste cagirilacak
-    
+    *head = newNode; // Update the head of the list to point to the new node
+
     return;
 }
 
-int giveHint(LastTwoClicked* hint, LastTwoClicked* LastClicks, int* clickable_freq) {
-    int hintedId = -1;
+
+int giveHint(LastTwoClicked* hint, LastTwoClicked* LastClicks, int* clickableTilesPerType) {
+    int hintedId = -1; // Initialize the variable to store the ID of the hinted tile, set to -1 as default (no hint)
+
+    // Search through all possible images to find one with at least two clickable instances
     for (int i = 0; i < NUM_IMAGES; i++) {
-        if (clickable_freq[i] >= 2) {
-            hintedId = i;
+        if (clickableTilesPerType[i] >= 2) { // If there are at least two tiles of the same type that can be clicked
+            hintedId = i; // Store the ID of this image as the hint
         }
     }
 
+    // If there are no tiles that can be matched (game logic detects no matchable tiles)
     if (gameState.matchable == 0) {
-        shakeTime = 10;
+        shakeTime = 10; // Trigger a shake effect to indicate no possible moves
     }
 
+    // Iterate over all layers and positions in the game array to find tiles matching the hinted ID
     for (int i = 0; i < LAYER; i++) {
         for (int j = 0; j < ARRAY_Y; j++) {
             for (int k = 0; k < ARRAY_X; k++) {
+
+                // Check if the tile matches the hinted ID and is clickable
                 if (tiles[j][k][i].id == hintedId && tiles[j][k][i].isClickable) {
-                    if (hint->lastClicked == NULL) {
-                        hint->lastClicked = &tiles[j][k][i];
+                    if (hint->lastClicked == NULL) { // If the last clicked hint slot is empty
+                        hint->lastClicked = &tiles[j][k][i]; // Assign this tile to the last clicked hint
                     }
-                    else if (hint->previousClicked == NULL) {
-                        hint->previousClicked = &tiles[j][k][i];
-                        goto loop_out;
+
+                    else if (hint->previousClicked == NULL) { // If the previous clicked hint slot is empty
+                        hint->previousClicked = &tiles[j][k][i]; // Assign this tile to the previous clicked hint
+
+                        goto loop_out; // Exit the loops once two hints are found
                     }
                 }
             }
         }
     }
 
-    loop_out://BURA COK MU KOTU BATAYA SOR
-    if (hint->lastClicked != NULL && hint->previousClicked != NULL) {
-        hint->lastClicked->color = BLUE;
-        hint->previousClicked->color = BLUE;
+    loop_out: // Label used to break out of the nested loops
+    
+    if (hint->lastClicked != NULL && hint->previousClicked != NULL) { // If both hint slots are filled
+        hint->lastClicked->color = BLUE; // Highlight the last clicked hint tile
+        hint->previousClicked->color = BLUE; // Highlight the previous clicked hint tile
     }
-    return 2;
+    return 2; // Return 2 as a hardcoded value, typically indicating successful hint placement
 }
 
+
 void deleteBegin(node** head, int* isExist, LastTwoClicked* LastClicks) {
-    if (*head == NULL) {//linked listten kaldirilacak oge yok, linked list zaten bos
-        // printf("Linked list is already empty\n");
-        shakeTime = 10;
+    if (*head == NULL) { // Check if the linked list is empty
+        shakeTime = 10; // Trigger a shake effect if there's nothing to undo
         return;
     }
-    node* tempNode = *head;
+    node* tempNode = *head; // Temporarily store the head node
 
-    tempNode->data1->isExists = true;//linked listten silerken cizilebilir hale getir
-    tempNode->data2->isExists = true;
-    
-    (&gameState)->totalPoint += -2 * tempNode->data1->combo * tempNode->data1->point;
+    tempNode->data1->isExists = true; // Make the first tile in the node drawable and clickable again
+    tempNode->data2->isExists = true; // Make the second tile in the node drawable and clickable again
 
-    isExist[tempNode->data1->order] = 1;//linked listten silerken o taşa karşılık değer 1 oldu
-    isExist[tempNode->data2->order] = 1;
+    gameState.totalPoint -= 2 * tempNode->data1->combo * tempNode->data1->point; // Reverse the points earned from this node
 
-    (tempNode)->data1->color = RAYWHITE;//linked listten silerken renklerini normal haline getir
-    (tempNode)->data2->color = RAYWHITE;
+    isExist[tempNode->data1->order] = 1; // Mark the first tile as existing again in the tracking array
+    isExist[tempNode->data2->order] = 1; // Mark the second tile as existing again in the tracking array
 
-    gameState.remainingTile += 2;
+    tempNode->data1->color = RAYWHITE; // Reset the color of the first tile to white
+    tempNode->data2->color = RAYWHITE; // Reset the color of the second tile to white
 
-    *head = (*head)->nextNode;//basa eklemeli linked list oldugu icin listen artik bir sonraki next node ile temsil ediliyor, ilk elemani cikartacagiz
-    //add begin - delete begin 
+    gameState.remainingTile += 2; // Increment the remaining tiles count as these tiles are added back to the game
 
-    free(tempNode);//node u listten kaldirdin, memorysini kullanmana gerek olmadigi icin serbest birak
+    *head = (*head)->nextNode; // Remove the first node by setting head to the next node
+
+    free(tempNode); // Free the memory allocated to the removed node
 }
