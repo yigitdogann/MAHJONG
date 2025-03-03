@@ -8,8 +8,8 @@ The tiles of the game were drawn by us using Adobe Photoshop and added to the ga
 ## 🀙Game Information
 • Players have to match two same tiles on table, hence these tiles will be removed from the table. 
 
-• The tile player chose to remove from the table:
-mustn't have any other tiles on it,
+• The tile player chose to remove from the table:</br>
+mustn't have any other tiles on it,</br>
 at least one side (right or left) must be empty,
 
 • There are 36 different tiles with 4 copies each. So players will have 144 total tiles from the beginning of the game. Map's difficulty doesn't change the number of tiles.
